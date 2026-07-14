@@ -1,0 +1,6 @@
+{
+  "name": "cambodia-macroeconomic-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cambodia Macroeconomic Dashboard with live Ask (Claude API proxy)"
+}
