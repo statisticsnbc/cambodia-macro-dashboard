@@ -355,19 +355,19 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="kpis" id="kpis"></div>
   <div class="ai" id="ov-ai"></div>
   <div class="grid">
-    <div class="card c4"><h3>Economic Health Score <a class="detail-link" href="#" onclick="goTo('risk','risk_grid');return false">details →</a></h3><div class="cs">Composite of growth, prices, external, fiscal, financial stability (0–100)</div>
+    <div class="card c4"><h3>Economic Health Score</h3><div class="cs">Composite of growth, prices, external, fiscal, financial stability (0–100)</div>
       <div class="score-wrap"><div class="score-ring"><canvas id="g_score"></canvas><div class="score-num"><b id="scoreN">—</b><span id="scoreL">—</span></div></div>
       <div class="score-bars" id="scoreBars"></div></div>
       <div class="src">Rule-based composite computed from the latest official data.</div></div>
-    <div class="card c4"><h3>Macro Balance Radar <a class="detail-link" href="#" onclick="goTo('real','r_gdpq');return false">details →</a></h3><div class="cs">Standing vs. 5-year norm (100 = neutral; outside = stronger)</div><div class="ch short"><canvas id="ov_radar"></canvas></div><div class="src">Sources: NBC, NIS, and MOT</div></div>
-    <div class="card c4"><h3>Policy Gauges <a class="detail-link" href="#" onclick="goTo('monetary','m_cpi');return false">details →</a></h3><div class="cs">Growth (NIS est.) · Inflation · Credit growth</div>
+    <div class="card c4"><h3>Macro Balance Radar</h3><div class="cs">Standing vs. 5-year norm (100 = neutral; outside = stronger)</div><div class="ch short"><canvas id="ov_radar"></canvas></div><div class="src">Sources: NBC, NIS, and MOT</div></div>
+    <div class="card c4"><h3>Policy Gauges</h3><div class="cs">Growth (NIS est.) · Inflation · Credit growth</div>
       <div style="display:flex;gap:8px;justify-content:space-around;align-items:center;height:220px">
         <div style="width:32%;position:relative"><canvas id="g_growth"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">GDP growth</div></div>
         <div style="width:32%;position:relative"><canvas id="g_infl"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Inflation</div></div>
         <div style="width:32%;position:relative"><canvas id="g_credit"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Credit growth</div></div>
       </div><div class="src">Source: National Bank of Cambodia</div></div>
     <div class="card c7"><h3>Macroeconomic Heatmap</h3><div class="cs">Year-on-year change of key indicators, last 12 months · click a row to view its chart</div><div style="overflow-x:auto"><table class="heat" id="ov_heat"></table></div><div class="src">Source: National Bank of Cambodia; green = improvement, red = deterioration</div></div>
-    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Cambodia 2026 real GDP growth (%) — NBC estimate vs external forecasters</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC (interpolated); ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
+    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast</h3><div class="cs">Cambodia 2026 real GDP growth (%) — waterfall, highest to lowest (each step = markdown from the previous source)</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC (interpolated); ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
 
     <div class="card c12"><h3>Economic Growth Road Map — Major Shocks &amp; Events</h3><div class="cs">Timeline of key global and domestic events shaping Cambodia's growth (2020–present), with their nature and likely impact</div>
       <div class="rm-legend"><b>Impact:</b>
@@ -1032,14 +1032,16 @@ function pageOverview(){
     if(ri===0)return; const nav=HEAT_NAV[ri-1]; if(!nav)return;
     tr.style.cursor='pointer'; tr.title='View details →'; tr.onclick=()=>goTo(nav[0],nav[1]);
   });
-  // 2026 forecast — simple bar chart (each bar's height = the actual figure)
+  // 2026 forecast — waterfall, sorted high-to-low (each step = markdown vs the previous source)
   {const IG=D.inst.gdp, iy=IG.years.indexOf('2026f');
    const nbc=(D.gdpAnnualI&&D.gdpAnnualI.g.length)?D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]:((IG['NBC / official']||[])[iy]);
-   const rows=[['NBC',nbc,p.navy],['ADB',(IG['ADB (Apr 26)']||[])[iy],p.royal],
+   const src=[['NBC',nbc,p.navy],['ADB',(IG['ADB (Apr 26)']||[])[iy],p.royal],
      ['World Bank',(IG['World Bank (Jun 26)']||[])[iy],p.emerald],['IMF',(IG['IMF (Jul 26)']||[])[iy],p.amber]]
      .filter(r=>r[1]!=null).sort((a,b)=>b[1]-a[1]);
-   mk('c_fc',{type:'bar',data:{labels:rows.map(r=>r[0]),datasets:[{data:rows.map(r=>r[1]),backgroundColor:rows.map(r=>r[2]),borderRadius:5,maxBarThickness:70}]},
-     options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>rows[c.dataIndex][0]+': '+fmt(rows[c.dataIndex][1],1)+'%'}}},
+   const lab=src.map(r=>r[0]), lv=src.map(r=>r[1]), col=src.map(r=>r[2]);
+   const seg=lv.map((v,i)=>i===0?[0,v]:[Math.min(lv[i-1],v),Math.max(lv[i-1],v)]);
+   mk('c_fc',{type:'bar',data:{labels:lab,datasets:[{data:seg,backgroundColor:col,borderRadius:4,maxBarThickness:64}]},
+     options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>lab[c.dataIndex]+': '+fmt(lv[c.dataIndex],1)+'%'+(c.dataIndex>0?' ('+(lv[c.dataIndex]-lv[c.dataIndex-1]>=0?'+':'')+fmt(lv[c.dataIndex]-lv[c.dataIndex-1],1)+' pp)':'')}}},
      scales:{x:{grid:{display:false},ticks:{color:p.text2,font:{size:11}}},y:{min:0,grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});}
   // AI commentary
   const infl=lastVal(M.infl), core=lastVal(M.core), tour=lastVal(mma3(M.tour_g)), cg=lastVal(M.psc_g), resm=lastVal(D.Q.res_mo), npl=lastVal(FSIS().npl);
