@@ -128,6 +128,11 @@ h1,h2,h3,.serif{font-family:'Source Serif 4',Georgia,serif}
 .up{color:var(--emerald)}.down{color:var(--red)}.flat{color:var(--amber)}
 .kpi .spark{height:34px;margin-top:6px}
 .kpi .period{position:absolute;top:13px;right:14px;font-size:9.5px;color:var(--text2);opacity:.75}
+#kpis .kpi{cursor:pointer}
+#kpis .kpi:hover{box-shadow:0 4px 10px rgba(11,37,69,.12),inset 0 0 0 1.5px var(--royal)}
+#ov_heat tr:hover td{filter:brightness(1.1)}
+.detail-link{cursor:pointer;font-size:11px;font-weight:700;color:var(--royal);text-decoration:none;float:right;margin-top:3px}
+.detail-link:hover{text-decoration:underline}
 
 /* ---------- AI insight ---------- */
 .ai{background:linear-gradient(120deg,var(--card2),var(--card));border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:14px;padding:16px 20px;margin:16px 0;box-shadow:var(--shadow)}
@@ -351,21 +356,21 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="kpis" id="kpis"></div>
   <div class="ai" id="ov-ai"></div>
   <div class="grid">
-    <div class="card c4"><h3>Economic Health Score</h3><div class="cs">Composite of growth, prices, external, fiscal, financial stability (0–100)</div>
+    <div class="card c4"><h3>Economic Health Score <a class="detail-link" href="#" onclick="goTo('risk','risk_grid');return false">details →</a></h3><div class="cs">Composite of growth, prices, external, fiscal, financial stability (0–100)</div>
       <div class="score-wrap"><div class="score-ring"><canvas id="g_score"></canvas><div class="score-num"><b id="scoreN">—</b><span id="scoreL">—</span></div></div>
       <div class="score-bars" id="scoreBars"></div></div>
       <div class="src">Rule-based composite computed from the latest official data.</div></div>
-    <div class="card c4"><h3>Macro Balance Radar</h3><div class="cs">Standing vs. 5-year norm (100 = neutral; outside = stronger)</div><div class="ch short"><canvas id="ov_radar"></canvas></div><div class="src">Sources: NBC, NIS, and MOT</div></div>
-    <div class="card c4"><h3>Policy Gauges</h3><div class="cs">Growth (NIS est.) · Inflation · Credit growth</div>
+    <div class="card c4"><h3>Macro Balance Radar <a class="detail-link" href="#" onclick="goTo('real','r_gdpq');return false">details →</a></h3><div class="cs">Standing vs. 5-year norm (100 = neutral; outside = stronger)</div><div class="ch short"><canvas id="ov_radar"></canvas></div><div class="src">Sources: NBC, NIS, and MOT</div></div>
+    <div class="card c4"><h3>Policy Gauges <a class="detail-link" href="#" onclick="goTo('monetary','m_cpi');return false">details →</a></h3><div class="cs">Growth (NIS est.) · Inflation · Credit growth</div>
       <div style="display:flex;gap:8px;justify-content:space-around;align-items:center;height:220px">
         <div style="width:32%;position:relative"><canvas id="g_growth"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">GDP growth</div></div>
         <div style="width:32%;position:relative"><canvas id="g_infl"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Inflation</div></div>
         <div style="width:32%;position:relative"><canvas id="g_credit"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Credit growth</div></div>
       </div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c7"><h3>Macroeconomic Heatmap</h3><div class="cs">Year-on-year change of key indicators, last 12 months</div><div style="overflow-x:auto"><table class="heat" id="ov_heat"></table></div><div class="src">Source: National Bank of Cambodia; green = improvement, red = deterioration</div></div>
-    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast</h3><div class="cs">Cambodia 2026 real GDP growth (%), successive institutional markdowns (waterfall)</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC; ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
+    <div class="card c7"><h3>Macroeconomic Heatmap</h3><div class="cs">Year-on-year change of key indicators, last 12 months · click a row to view its chart</div><div style="overflow-x:auto"><table class="heat" id="ov_heat"></table></div><div class="src">Source: National Bank of Cambodia; green = improvement, red = deterioration</div></div>
+    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Cambodia 2026 real GDP growth (%), successive institutional markdowns (waterfall)</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC; ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
 
-    <div class="card c12"><h3>Real GDP Growth Outlook — 2026 Forecast</h3><div class="cs">Latest institutional projections for Cambodia's 2026 real GDP growth, ranked</div>
+    <div class="card c12"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Latest institutional projections for Cambodia's 2026 real GDP growth, ranked</div>
       <div style="overflow-x:auto"><table class="fc-tbl" id="ov_fc_table"></table></div>
       <div class="fc-note" id="ov_fc_note">—</div>
     </div>
@@ -945,6 +950,11 @@ function kpiRow(){
     {l:'Banking ROE',v:lastVal(FSIS().roe),suf:'%',prev:valAt(FSIS().roe,lastIdx(FSIS().roe)-1),spark:FSIS().roe,goodUp:true,per:fsiLab('roe'),color:'--gold',note:'FSI Framework'},
     {l:'Dollarization',v:lastVal(M.fcd),suf:'%',prev:valAt(M.fcd,lastIdx(M.fcd)-1),spark:M.fcd,goodUp:false,per:monLab(d[lastIdx(M.fcd)]),color:'--navy2',note:'FCD share of deposits'},
   ];
+  // where each KPI links to: [tab, chart id]
+  const NAV=[['real','r_gdpq'],['monetary','m_cpi'],['monetary','m_cpi'],['monetary','m_fx'],
+    ['external','e_res'],['external','e_bop'],['fiscal','fx_fisgdp'],['compare','c_debt'],
+    ['monetary','m_credit'],['monetary','m_m2'],['monetary','m_credit'],['banking','b_npl'],
+    ['banking','b_prof'],['banking','b_prof'],['monetary','m_dollar']];
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
   defs.forEach((k,ix)=>{
     const dec=k.d!=null?k.d:(Math.abs(k.v)>=100?0:1);
@@ -953,6 +963,7 @@ function kpiRow(){
     const arr=ch==null?'':(Math.abs(ch)<1e-9?'▬':(ch>0?'▲':'▼'));
     const cls=ch==null?'flat':(Math.abs(ch)<1e-9?'flat':(ch>0?'up':'down'));
     const div=document.createElement('div'); div.className='kpi'; div.style.setProperty('--kc',`var(${k.color})`);
+    if(NAV[ix]){div.style.cursor='pointer'; div.title='View details →'; div.onclick=()=>goTo(NAV[ix][0],NAV[ix][1]);}
     div.innerHTML=`<div class="period">${k.per}</div><div class="lbl">${k.l}</div>
       <div class="val">${fmt(k.v,dec)}<small>${k.suf}</small></div>
       <div class="meta">${ch==null?'':`<span class="arrow ${cls}">${arr} ${fmt(Math.abs(ch),dec)}</span><span>vs prev.</span>`}${k.note?`<span>· ${k.note}</span>`:''}</div>
@@ -1013,6 +1024,14 @@ function pageOverview(){
     ['Import growth %',cut(M.imp_g),1],['Credit growth %',cut(M.psc_g),1],['M2 growth %',cut(M.m2_g),1],
     ['Deposit growth %',cut(M.dep_g),1],['Tourism growth %',cut(M.tour_g),1],['Property prices %',cut(M.rppi_yoy),1],
     ['KHR/USD %',cut(M.fx_yoy),-1]]);
+  // link each heatmap row to its detailed chart
+  const HEAT_NAV=[['monetary','m_cpi'],['monetary','m_cpi'],['external','e_grow'],['external','e_grow'],
+    ['monetary','m_credit'],['monetary','m_m2'],['monetary','m_credit'],['external','r_tour'],
+    ['rppi','r_rppi'],['monetary','m_fx']];
+  document.querySelectorAll('#ov_heat tr').forEach((tr,ri)=>{
+    if(ri===0)return; const nav=HEAT_NAV[ri-1]; if(!nav)return;
+    tr.style.cursor='pointer'; tr.title='View details →'; tr.onclick=()=>goTo(nav[0],nav[1]);
+  });
   // 2026 forecast — waterfall of successive institutional markdowns for Cambodia (moved from Comparison)
   {const IG=D.inst.gdp, iy=IG.years.indexOf('2026f');
    const wl=['NBC / official','ADB (Apr 26)','World Bank (Jun 26)','IMF (Jul 26)'];
@@ -2632,6 +2651,18 @@ function mountAskBoxes(pid){
     box.querySelector('input').addEventListener('keydown',ev=>{if(ev.key==='Enter')askInsight(box);});
     ai.appendChild(box);
   });
+}
+// navigate from the Overview to a specific chart in another tab, then highlight it
+function goTo(pid,elId){
+  show(pid);
+  if(!elId)return;
+  setTimeout(()=>{const el=document.getElementById(elId);if(!el)return;
+    const card=el.closest('.card')||el;
+    card.scrollIntoView({behavior:'smooth',block:'center'});
+    const prev=card.style.boxShadow; card.style.transition='box-shadow .35s';
+    card.style.boxShadow='0 0 0 3px var(--gold)';
+    setTimeout(()=>{card.style.boxShadow=prev;},1500);
+  },90);
 }
 function show(pid){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.p===pid));
