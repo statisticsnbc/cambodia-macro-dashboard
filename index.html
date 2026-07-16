@@ -2655,12 +2655,32 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
   Object.keys(rendered).forEach(k=>delete rendered[k]);
   const active=document.querySelector('.tab.active').dataset.p; PAGES[active](); rendered[active]=true; mountAskBoxes(active);
 });
-// PNG export buttons
+// export a chart's underlying data to CSV
+function chartToCSV(ch,id){
+  const d=ch.data||{},labels=d.labels||[],ds=(d.datasets||[]).filter(s=>s&&s.data);
+  const cell=v=>v==null?'':(typeof v==='object'?(Array.isArray(v)?v.join(' '):(v.y!=null?v.y:(v.v!=null?v.v:JSON.stringify(v)))):v);
+  const esc=s=>{s=String(s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  const head=['Label'].concat(ds.map((s,i)=>s.label||('Series '+(i+1))));
+  let n=labels.length; ds.forEach(s=>{if(s.data.length>n)n=s.data.length;});
+  const lines=[head.map(esc).join(',')];
+  for(let i=0;i<n;i++){
+    const row=[labels[i]!=null?labels[i]:i];
+    ds.forEach(s=>row.push(cell(s.data[i])));
+    lines.push(row.map(esc).join(','));
+  }
+  const blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.download=id+'.csv';a.href=URL.createObjectURL(blob);a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+// PNG + CSV export buttons
 document.querySelectorAll('.card').forEach(c=>{
   const cv=c.querySelector('canvas'); if(!cv||!cv.id||cv.id.startsWith('spk')||cv.id.startsWith('g_'))return;
   const b=document.createElement('button');b.className='png-btn';b.textContent='PNG ↓';
   b.onclick=()=>{const ch=charts[cv.id];if(!ch)return;const a=document.createElement('a');a.download=cv.id+'.png';a.href=ch.toBase64Image('image/png',1);a.click();};
   c.appendChild(b);
+  const cb=document.createElement('button');cb.className='png-btn';cb.style.right='66px';cb.textContent='CSV ↓';
+  cb.onclick=()=>{const ch=charts[cv.id];if(ch)chartToCSV(ch,cv.id);};
+  c.appendChild(cb);
 });
 show('overview');
 </script>
