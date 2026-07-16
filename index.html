@@ -1080,7 +1080,7 @@ function pageReal(){
     const pcv=((D.pcWB||gG.pc_usd)||[]).filter(x=>x!=null), pcGrow=pcv.length>=2?((pcv[pcv.length-1]/pcv[pcv.length-2]-1)*100):null;
     const conG=(R2&&R2.prod_sub&&R2.prod_sub.Construction)?lastNN(R2.prod_sub.Construction):null;
     const eco=[
-      ['Real GDP Growth '+((D.gdpAnnualI&&D.gdpAnnualI.years.length)?D.gdpAnnualI.years[D.gdpAnnualI.years.length-1]:'2025')+', NBC',(D.gdpAnnualI&&D.gdpAnnualI.g.length?fmt(D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]):fmt(gG.growth[gG.growth.length-1]))+'%','Interpolated (NBC)','--navy2',['real','r_gdpq']],
+      ['Real GDP Growth '+((D.gdpAnnualI&&D.gdpAnnualI.years.length)?D.gdpAnnualI.years[D.gdpAnnualI.years.length-1]:'2025')+'F, NBC',(D.gdpAnnualI&&D.gdpAnnualI.g.length?fmt(D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]):fmt(gG.growth[gG.growth.length-1]))+'%','Interpolated GDP','--navy2',['real','r_gdpq']],
       ['GDP per Capita Growth',(pcGrow!=null?fmt(pcGrow)+'%':'—'),'2025, current US$','--royal',['real','r_pc']],
       ['Headline Inflation',fmt(lastNN(Mm.infl))+'%',lastMonNN(Mm.infl)+', y/y','--amber',['monetary','m_cpi']],
       ['Core Inflation',fmt(lastNN(Mm.core))+'%',lastMonNN(Mm.core)+', y/y','--gold',['monetary','m_cpi']],
