@@ -368,12 +368,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
         <div style="width:32%;position:relative"><canvas id="g_credit"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Credit growth</div></div>
       </div><div class="src">Source: National Bank of Cambodia</div></div>
     <div class="card c7"><h3>Macroeconomic Heatmap</h3><div class="cs">Year-on-year change of key indicators, last 12 months · click a row to view its chart</div><div style="overflow-x:auto"><table class="heat" id="ov_heat"></table></div><div class="src">Source: National Bank of Cambodia; green = improvement, red = deterioration</div></div>
-    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Cambodia 2026 real GDP growth (%), successive institutional markdowns (waterfall)</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC; ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
-
-    <div class="card c12"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Latest institutional projections for Cambodia's 2026 real GDP growth, ranked</div>
-      <div style="overflow-x:auto"><table class="fc-tbl" id="ov_fc_table"></table></div>
-      <div class="fc-note" id="ov_fc_note">—</div>
-    </div>
+    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast <a class="detail-link" href="#" onclick="goTo('compare','c_gdp');return false">details →</a></h3><div class="cs">Cambodia 2026 real GDP growth (%) — NBC estimate vs external forecasters</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC (interpolated); ADB Asian Development Outlook (Apr 2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
 
     <div class="card c12"><h3>Economic Growth Road Map — Major Shocks &amp; Events</h3><div class="cs">Timeline of key global and domestic events shaping Cambodia's growth (2020–present), with their nature and likely impact</div>
       <div class="rm-legend"><b>Impact:</b>
@@ -436,6 +431,12 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
           <div class="rm-date">2025<small>MAY–DEC</small></div><div class="rm-node"></div>
           <div class="rm-card"><div class="rm-head"><span class="rm-tag" style="background:var(--red)">Geopolitical</span><span class="rm-title">Cambodia–Thailand Border Conflict</span><span class="rm-imp imp-severe">▼▼ High negative</span></div>
           <div class="rm-desc">Clashes flared in May, escalated to full fighting on <b>24 Jul</b> (first ceasefire 28 Jul) and reignited in December before a second ceasefire on <b>27 Dec 2025</b>. Border closures halted cross-border trade and fuel flows and caused <b>tourist arrivals to fall sharply</b>.</div></div>
+        </div>
+
+        <div class="rm-row sev">
+          <div class="rm-date">2025<small>JUN–26</small></div><div class="rm-node"></div>
+          <div class="rm-card"><div class="rm-head"><span class="rm-tag" style="background:var(--red)">Geopolitical</span><span class="rm-title">Middle East Conflict — Iran &amp; Strait of Hormuz</span><span class="rm-imp imp-neg">▼ Negative</span></div>
+          <div class="rm-desc">A 12-day Israel–Iran air war in <b>June 2025</b> was followed by a sharper escalation in early 2026, when US–Israel strikes led Iran to <b>blockade the Strait of Hormuz</b> — the route for about a quarter of the world's seaborne oil. Brent crude jumped roughly <b>10–13% to ~US$80–82/barrel</b>. As a net fuel importer, Cambodia faces renewed imported-fuel inflation and higher transport and shipping costs.</div></div>
         </div>
 
         <div class="rm-row fwd">
@@ -1032,40 +1033,15 @@ function pageOverview(){
     if(ri===0)return; const nav=HEAT_NAV[ri-1]; if(!nav)return;
     tr.style.cursor='pointer'; tr.title='View details →'; tr.onclick=()=>goTo(nav[0],nav[1]);
   });
-  // 2026 forecast — waterfall of successive institutional markdowns for Cambodia (moved from Comparison)
+  // 2026 forecast — simple bar chart (each bar's height = the actual figure)
   {const IG=D.inst.gdp, iy=IG.years.indexOf('2026f');
-   const wl=['NBC / official','ADB (Apr 26)','World Bank (Jun 26)','IMF (Jul 26)'];
-   const wlab=['NBC','ADB','World Bank','IMF'];
-   const lv=wl.map(k=>IG[k]&&IG[k][iy]!=null?IG[k][iy]:null).filter(v=>v!=null);
-   const seg=lv.map((v,i)=>i===0?[0,v]:[Math.min(lv[i-1],v),Math.max(lv[i-1],v)]);
-   const wcol=lv.map((v,i)=>i===0?p.navy:(i===lv.length-1?p.gold:p.red+'B3'));
-   mk('c_fc',{type:'bar',data:{labels:wlab.slice(0,lv.length),datasets:[{data:seg,backgroundColor:wcol,borderRadius:4}]},
-     options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>wlab[c.dataIndex]+': '+fmt(lv[c.dataIndex])+'%'+(c.dataIndex>0?' ('+(lv[c.dataIndex]-lv[c.dataIndex-1]>=0?'+':'')+fmt(lv[c.dataIndex]-lv[c.dataIndex-1])+' pp)':'')}}},
-     scales:{x:{grid:{display:false},ticks:{color:p.text2,font:{size:10}}},y:{min:0,grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});}
-  // 2026 forecast — ranked table (below the waterfall)
-  {const IG=D.inst&&D.inst.gdp, i26=IG?IG.years.indexOf('2026f'):-1, tEl=document.getElementById('ov_fc_table');
-   if(IG&&i26>=0&&tEl){
-     const col={'NBC (interpolated)':p.navy,'ADB (Apr 26)':p.royal,'World Bank (Jun 26)':p.emerald,'IMF (Jul 26)':p.amber};
-     const disp={'NBC (interpolated)':'NBC','ADB (Apr 26)':'ADB','World Bank (Jun 26)':'World Bank','IMF (Jul 26)':'IMF'};
-     const pub={'NBC (interpolated)':'Interpolated from NIS constant-price data','ADB (Apr 26)':'Asian Development Outlook · Apr 2026','World Bank (Jun 26)':'Cambodia Economic Update · Jun 2026','IMF (Jul 26)':'Article IV Mission · Jul 2026'};
-     const nbc=(D.gdpAnnualI&&D.gdpAnnualI.g.length)?D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]:null;
-     let rows=[];
-     ['ADB (Apr 26)','World Bank (Jun 26)','IMF (Jul 26)'].forEach(k=>{if(IG[k]&&IG[k][i26]!=null)rows.push([k,IG[k][i26]]);});
-     if(nbc!=null)rows.push(['NBC (interpolated)',nbc]);
-     rows.sort((a,b)=>b[1]-a[1]);
-     const th='<tr><th>Source</th><th>2026 Forecast</th><th>Publication</th><th>vs NBC</th></tr>';
-     const body=rows.map(([k,v])=>{const c=col[k]||p.royal, isNbc=(k==='NBC (interpolated)');
-       let gap='<span class="fc-meta">—</span>';
-       if(!isNbc&&nbc!=null){const d=v-nbc; gap=`<span style="color:${d<0?p.red:d>0?p.emerald:p.text2};font-weight:800">${d>0?'+':''}${fmt(d,1)} pp</span>`;}
-       return `<tr class="${isNbc?'fc-official':''}"><td><span class="src-name"><span class="swatch" style="background:${c}"></span>${disp[k]||k}</span></td>`
-         +`<td style="text-align:center"><span class="fc-pill" style="background:${c}22;color:${c}">${fmt(v,1)}%</span></td>`
-         +`<td class="fc-meta">${pub[k]||''}</td>`
-         +`<td style="text-align:center">${gap}</td></tr>`;}).join('');
-     tEl.innerHTML=th+body;
-     const mn=Math.min(...rows.map(r=>r[1])), mx=Math.max(...rows.map(r=>r[1]));
-     const nEl=document.getElementById('ov_fc_note');
-     if(nEl)nEl.innerHTML=`The 2026 consensus spans <b>${fmt(mn,1)}%–${fmt(mx,1)}%</b>. External agencies (IMF, World Bank, ADB) project a softer 2026 on export-margin pressure, the Thai border closure, and weaker tourism and remittances. The NBC figure is derived from constant-price (riel) national-accounts data — an estimate, not a forecast-model projection.`;
-   }}
+   const nbc=(D.gdpAnnualI&&D.gdpAnnualI.g.length)?D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]:((IG['NBC / official']||[])[iy]);
+   const rows=[['NBC',nbc,p.navy],['ADB',(IG['ADB (Apr 26)']||[])[iy],p.royal],
+     ['World Bank',(IG['World Bank (Jun 26)']||[])[iy],p.emerald],['IMF',(IG['IMF (Jul 26)']||[])[iy],p.amber]]
+     .filter(r=>r[1]!=null).sort((a,b)=>b[1]-a[1]);
+   mk('c_fc',{type:'bar',data:{labels:rows.map(r=>r[0]),datasets:[{data:rows.map(r=>r[1]),backgroundColor:rows.map(r=>r[2]),borderRadius:5,maxBarThickness:70}]},
+     options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>rows[c.dataIndex][0]+': '+fmt(rows[c.dataIndex][1],1)+'%'}}},
+     scales:{x:{grid:{display:false},ticks:{color:p.text2,font:{size:11}}},y:{min:0,grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});}
   // AI commentary
   const infl=lastVal(M.infl), core=lastVal(M.core), tour=lastVal(mma3(M.tour_g)), cg=lastVal(M.psc_g), resm=lastVal(D.Q.res_mo), npl=lastVal(FSIS().npl);
   document.getElementById('ov-ai').innerHTML=`<div class="ai-t">✦ Macroeconomic Assessment</div>
