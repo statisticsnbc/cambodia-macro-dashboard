@@ -63,6 +63,9 @@ h1,h2,h3,.serif{font-family:'Source Serif 4',Georgia,serif}
 .hero-inner{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;position:relative;z-index:2}
 .hero h1{margin:0;font-size:26px;font-weight:700;letter-spacing:.2px}
 .hero .sub{font-size:13px;color:#B9C7DA;margin-top:5px;font-style:italic}
+.hero .prep{display:inline-flex;align-items:center;gap:8px;margin-top:11px;font-size:11.5px;color:#F3D97C;background:linear-gradient(135deg,rgba(212,175,55,.18),rgba(212,175,55,.06));border:1px solid rgba(212,175,55,.4);border-radius:99px;padding:5px 15px 5px 12px;font-weight:600;letter-spacing:.3px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.hero .prep b{color:#fff;font-weight:700}
+.hero .prep .pen{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;border-radius:50%;background:rgba(212,175,55,.9);color:#0B2545;font-size:11px}
 .hero-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);padding:7px 14px;border-radius:10px;font-size:11.5px;color:#D7E1EE}
 .chip b{color:#fff;font-weight:600}
@@ -308,6 +311,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div>
     <h1>Cambodia Macroeconomic Dashboard</h1>
     <div class="sub">Monitoring Real, External, Monetary, Fiscal and Financial Sector Developments</div>
+    <div class="prep"><span class="pen">✎</span>Prepared by <b>Statistics Department</b></div>
   </div>
   <div class="hero-right">
     <div class="chip">Latest data <b id="hd-date">—</b></div>
@@ -803,6 +807,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
 </div></div>
 
 <footer><div class="wrap">
+  <div style="font-size:12.5px;margin-bottom:9px"><b style="color:var(--gold)">Prepared by:</b> <b style="color:var(--text)">Statistics Department</b>, National Bank of Cambodia</div>
   <b>Cambodia Macroeconomic Dashboard</b> — compiled from official sources: National Bank of Cambodia (Monetary & Financial Statistics, Balance of Payments Statistics, Financial Soundness Indicators, Residential Property Price Index), Ministry of Economy and Finance (Government Finance Statistics GFSM2014, Public Debt Statistical Bulletin), National Institute of Statistics (CPI, GDP), General Department of Customs and Excise (trade), Ministry of Tourism (arrivals). International references: IMF Article IV Mission (Jul 2026), IMF WEO (Apr 2026), World Bank Cambodia Economic Update / EAP Update (Jun 2026), ADB Asian Development Outlook (Apr 2026).
 </div></footer>
 <script>
