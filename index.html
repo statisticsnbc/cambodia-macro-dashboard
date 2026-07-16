@@ -1466,13 +1466,13 @@ function pageFiscal(){
   const money=v=>{if(v==null)return '—';const a=Math.abs(v),s=v<0?'-':'';return a>=1000?(s+'$'+fmt(a/1000,2)):(s+'$'+fmt0(a));};
   const unit=v=>v==null?'':(Math.abs(v)>=1000?' bn':' mn');
   const arrow=(y,good)=>{if(y==null)return '5-month total';const up=y>=0,cls=up?'up':'down';return `<span class="arrow ${cls}">${up?'▲':'▼'} ${fmt(Math.abs(y),1)}%</span> y/y · 5-month`;};
-  const setKpi=(id,label,d,color,sub)=>{const el=document.getElementById(id);if(!el)return;el.style.setProperty('--kc',color);el.innerHTML=`<div class="lbl">${label}</div><div class="val">${money(d.cur)}<small>${unit(d.cur)}</small></div><div class="meta">${sub}</div>`;};
+  const setKpi=(id,label,d,color,sub,tgt)=>{const el=document.getElementById(id);if(!el)return;el.style.setProperty('--kc',color);el.innerHTML=`<div class="lbl">${label}</div><div class="val">${money(d.cur)}<small>${unit(d.cur)}</small></div><div class="meta">${sub}</div>`;if(tgt){el.classList.add('kpi-link');el.title='View chart →';el.onclick=()=>goTo('fiscal',tgt);}};
   const dRev=kget(F.rev),dExp=kget(F.exp),dNlb=kget(F.netlend),dNafa=kget(F.nafa),dNil=kget(F.nil);
-  setKpi('f_k_rev','Total Revenue',dRev,p.emerald,arrow(dRev.yoy,true));
-  setKpi('f_k_exp','Total Expenditure',dExp,p.red,arrow(dExp.yoy,false));
-  setKpi('f_k_nlb','Net Lending (+)/Borrowing (−)',dNlb,(dNlb.cur||0)>=0?p.emerald:p.red,((dNlb.cur||0)>=0?'Surplus':'Deficit')+' · 5-month');
-  setKpi('f_k_nafa','Net Acquisition of Financial Assets',dNafa,p.royal,'5-month flow');
-  setKpi('f_k_nil','Net Incurrence of Liabilities',dNil,p.amber,'5-month flow');
+  setKpi('f_k_rev','Total Revenue',dRev,p.emerald,arrow(dRev.yoy,true),'fx_revcomp');
+  setKpi('f_k_exp','Total Expenditure',dExp,p.red,arrow(dExp.yoy,false),'fx_expcomp');
+  setKpi('f_k_nlb','Net Lending (+)/Borrowing (−)',dNlb,(dNlb.cur||0)>=0?p.emerald:p.red,((dNlb.cur||0)>=0?'Surplus':'Deficit')+' · 5-month','fx_fisop');
+  setKpi('f_k_nafa','Net Acquisition of Financial Assets',dNafa,p.royal,'5-month flow','fx_finvl');
+  setKpi('f_k_nil','Net Incurrence of Liabilities',dNil,p.amber,'5-month flow','fx_finvl');
   // 2. Fiscal Overview, Revenue, Expenditure (x-1), Overall Balance (= Revenue − Expenditure), stacked area
   // 3. Fiscal Operations, clustered Revenue & Expenditure(−); Overall Balance = Revenue − Expenditure (secondary axis)
   const opRev=mon(F.rev), opExp=mon(F.exp);
