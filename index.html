@@ -130,9 +130,14 @@ h1,h2,h3,.serif{font-family:'Source Serif 4',Georgia,serif}
 .kpi .period{position:absolute;top:13px;right:14px;font-size:9.5px;color:var(--text2);opacity:.75}
 #kpis .kpi{cursor:pointer}
 #kpis .kpi:hover{box-shadow:0 4px 10px rgba(11,37,69,.12),inset 0 0 0 1.5px var(--royal)}
+.kpi-link{cursor:pointer}
+.kpi-link:hover{box-shadow:0 4px 10px rgba(11,37,69,.12),inset 0 0 0 1.5px var(--royal)}
 #ov_heat tr:hover td{filter:brightness(1.1)}
 .detail-link{position:absolute;bottom:11px;right:14px;z-index:3;cursor:pointer;font-size:11px;font-weight:700;color:var(--royal);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 10px;transition:.18s}
 .detail-link:hover{background:var(--royal);color:#fff;border-color:var(--royal)}
+.sc-link{cursor:pointer;transition:.15s}
+.sc-link:hover{color:var(--royal);text-decoration:underline}
+.sc-link::after{content:' ↗';font-size:9px;opacity:.55}
 
 /* ---------- AI insight ---------- */
 .ai{background:linear-gradient(120deg,var(--card2),var(--card));border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:14px;padding:16px 20px;margin:16px 0;box-shadow:var(--shadow)}
@@ -698,7 +703,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="sec-title serif">Commercial Bank Peer Comparison</div>
   <div class="sec-sub">Key performance indicators of ten commercial banks, extracted from audited FY2025 annual reports. Figures in million USD unless stated otherwise.</div>
   <div class="grid">
-    <div class="card c12"><h3>Bank Scorecard — FY2025</h3><div class="cs">Balance sheet, profitability and prudential indicators · colour scale per column (green = stronger) · † = NBC-staff computed from financial statements</div><div style="overflow-x:auto"><table class="tbl" id="bc_tbl"></table></div><div class="src">Source: audited annual reports FY2025 (ABA, ACLEDA, Canadia, KB PRASAC, Wing, CPBank, Sathapana, BOC Phnom Penh Branch, FTB, Maybank). ACLEDA = consolidated group; BOC = branch of Bank of China (Hong Kong); ROA/ROE as reported (average-based where disclosed).</div></div>
+    <div class="card c12"><h3>Bank Scorecard — FY2025</h3><div class="cs">Balance sheet, profitability and prudential indicators · colour scale per column (green = stronger) · click a column header to view its chart · † = NBC-staff computed from financial statements</div><div style="overflow-x:auto"><table class="tbl" id="bc_tbl"></table></div><div class="src">Source: audited annual reports FY2025 (ABA, ACLEDA, Canadia, KB PRASAC, Wing, CPBank, Sathapana, BOC Phnom Penh Branch, FTB, Maybank). ACLEDA = consolidated group; BOC = branch of Bank of China (Hong Kong); ROA/ROE as reported (average-based where disclosed).</div></div>
     <div class="card c6"><h3>Total Assets</h3><div class="cs">Million USD, FY2024 vs FY2025 (sorted by size)</div><div class="ch"><canvas id="bc_assets"></canvas></div><div class="src">Source: audited annual reports FY2025</div></div>
     <div class="card c6"><h3>Loans and Deposits — FY2025</h3><div class="cs">Loan portfolio vs customer deposits (Million USD); line = loan-to-deposit ratio (%)</div><div class="ch"><canvas id="bc_ld"></canvas></div><div class="src">Source: audited annual reports FY2025. Loans as reported (gross where disclosed, otherwise net).</div></div>
     <div class="card c6"><h3>Profitability Map — ROA × ROE</h3><div class="cs">Return on Assets (x) vs Return on Equity (y), %; bubble size = total assets</div><div class="ch"><canvas id="bc_prof"></canvas></div><div class="src">Source: audited annual reports FY2025; † computed where not disclosed</div></div>
@@ -1075,21 +1080,23 @@ function pageReal(){
     const pcv=((D.pcWB||gG.pc_usd)||[]).filter(x=>x!=null), pcGrow=pcv.length>=2?((pcv[pcv.length-1]/pcv[pcv.length-2]-1)*100):null;
     const conG=(R2&&R2.prod_sub&&R2.prod_sub.Construction)?lastNN(R2.prod_sub.Construction):null;
     const eco=[
-      ['Real GDP Growth '+((D.gdpAnnualI&&D.gdpAnnualI.years.length)?D.gdpAnnualI.years[D.gdpAnnualI.years.length-1]:'2025')+', NBC',(D.gdpAnnualI&&D.gdpAnnualI.g.length?fmt(D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]):fmt(gG.growth[gG.growth.length-1]))+'%','Interpolated (NBC)','--navy2'],
-      ['GDP per Capita Growth',(pcGrow!=null?fmt(pcGrow)+'%':'—'),'2025, current US$','--royal'],
-      ['Headline Inflation',fmt(lastNN(Mm.infl))+'%',lastMonNN(Mm.infl)+', y/y','--amber'],
-      ['Core Inflation',fmt(lastNN(Mm.core))+'%',lastMonNN(Mm.core)+', y/y','--gold'],
-      ['Tourist Arrivals (3MMA, y/y)',fmt(lastVal(mma3(Mm.tour_g)))+'%','3-month moving avg','--red'],
-      ['Construction Growth',(conG!=null?fmt(conG)+'%':'—'),'2025p, real y/y','--navy2'],
+      ['Real GDP Growth '+((D.gdpAnnualI&&D.gdpAnnualI.years.length)?D.gdpAnnualI.years[D.gdpAnnualI.years.length-1]:'2025')+', NBC',(D.gdpAnnualI&&D.gdpAnnualI.g.length?fmt(D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]):fmt(gG.growth[gG.growth.length-1]))+'%','Interpolated (NBC)','--navy2',['real','r_gdpq']],
+      ['GDP per Capita Growth',(pcGrow!=null?fmt(pcGrow)+'%':'—'),'2025, current US$','--royal',['real','r_pc']],
+      ['Headline Inflation',fmt(lastNN(Mm.infl))+'%',lastMonNN(Mm.infl)+', y/y','--amber',['monetary','m_cpi']],
+      ['Core Inflation',fmt(lastNN(Mm.core))+'%',lastMonNN(Mm.core)+', y/y','--gold',['monetary','m_cpi']],
+      ['Tourist Arrivals (3MMA, y/y)',fmt(lastVal(mma3(Mm.tour_g)))+'%','3-month moving avg','--red',['external','r_tour']],
+      ['Construction Growth',(conG!=null?fmt(conG)+'%':'—'),'2025p, real y/y','--navy2',['real','r_indsub']],
     ];
     const IG=D.inst&&D.inst.gdp, i26=IG?IG.years.indexOf('2026f'):-1;
     const fc=k=>(IG&&i26>=0&&IG[k]&&IG[k][i26]!=null)?fmt(IG[k][i26])+'%':'—';
     if(IG&&i26>=0){eco.splice(1,0,
-      ['Real GDP Growth 2026f, ADB',fc('ADB (Apr 26)'),'Asian Development Outlook','--royal'],
-      ['Real GDP Growth 2026f, World Bank',fc('World Bank (Jun 26)'),'Cambodia Economic Update','--emerald'],
-      ['Real GDP Growth 2026f, IMF',fc('IMF (Jul 26)'),'Article IV mission (Jul 2026)','--amber']
+      ['Real GDP Growth 2026f, ADB',fc('ADB (Apr 26)'),'Asian Development Outlook','--royal',['compare','c_gdp']],
+      ['Real GDP Growth 2026f, World Bank',fc('World Bank (Jun 26)'),'Cambodia Economic Update','--emerald',['compare','c_gdp']],
+      ['Real GDP Growth 2026f, IMF',fc('IMF (Jul 26)'),'Article IV mission (Jul 2026)','--amber',['compare','c_gdp']]
     );}
-    document.getElementById('r_wb').innerHTML=eco.map(([l,v,n,c])=>`<div class="kpi" style="--kc:var(${c})"><div class="lbl">${l}</div><div class="val">${v}</div><div class="meta"><span>${n}</span></div></div>`).join('');}
+    document.getElementById('r_wb').innerHTML=eco.map(([l,v,n,c,nav])=>{
+      const a=nav?` class="kpi kpi-link" style="--kc:var(${c})" title="View chart →" onclick="goTo('${nav[0]}','${nav[1]}')"`:` class="kpi" style="--kc:var(${c})"`;
+      return `<div${a}><div class="lbl">${l}</div><div class="val">${v}</div><div class="meta"><span>${n}</span></div></div>`;}).join('');}
   // national accounts detail (Real folder)
   if(D.real2){const R=D.real2, ryl=R.years;
     const ccol={'Household Consumption':p.royal,'Government & NPISH':p.navy,'Investment (GFCF + Inventories)':p.gold,'Net Exports':p.emerald};
@@ -1349,16 +1356,16 @@ function pageMonetary(){
      const lv=a=>{const i=lastIdx(a);return i<0?[null,'']:[a[i],D.mdates[i]?monLab(D.mdates[i]):''];};
      const doll=(()=>{const i=lastIdx(M.fcd);if(i<0||M.fcd[i]==null||M.lcd[i]==null)return [null,''];return [100*M.fcd[i]/(M.fcd[i]+M.lcd[i]),monLab(D.mdates[i])];})();
      const defs=[
-       ['Headline Inflation',...lv(M.infl),'% y/y','--amber'],
-       ['Core Inflation',...lv(M.core),'% y/y','--gold'],
-       ['Broad Money (M2) Growth',...lv(M.m2_g),'% y/y','--royal'],
-       ['Private Credit Growth',...lv(M.psc_g),'% y/y','--emerald'],
-       ['Deposit Growth',...lv(M.dep_g),'% y/y','--navy2'],
-       ['KHR/USD Exchange Rate',...lv(M.fx),' riel','--royal'],
-       ['Riel Depreciation',...lv(M.fx_yoy),'% y/y','--red'],
-       ['Deposit Dollarization',...doll,'% of deposits','--gold'],
+       ['Headline Inflation',...lv(M.infl),'% y/y','--amber','m_cpi'],
+       ['Core Inflation',...lv(M.core),'% y/y','--gold','m_cpi'],
+       ['Broad Money (M2) Growth',...lv(M.m2_g),'% y/y','--royal','m_m2'],
+       ['Private Credit Growth',...lv(M.psc_g),'% y/y','--emerald','m_credit'],
+       ['Deposit Growth',...lv(M.dep_g),'% y/y','--navy2','m_credit'],
+       ['KHR/USD Exchange Rate',...lv(M.fx),' riel','--royal','m_fx'],
+       ['Riel Depreciation',...lv(M.fx_yoy),'% y/y','--red','m_fx'],
+       ['Deposit Dollarization',...doll,'% of deposits','--gold','m_dollar'],
      ];
-     kel.innerHTML=defs.map(([l,v,d,u,c])=>`<div class="kpi" style="--kc:var(${c})"><div class="period">${d}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':fmt(v,u===' riel'?0:1)}<small>${u}</small></div></div>`).join('');
+     kel.innerHTML=defs.map(([l,v,d,u,c,ch])=>`<div class="kpi${ch?' kpi-link':''}" style="--kc:var(${c})"${ch?` title="View chart →" onclick="goTo('monetary','${ch}')"`:''}><div class="period">${d}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':fmt(v,u===' riel'?0:1)}<small>${u}</small></div></div>`).join('');
    }}
   mk('m_cpi',{type:'line',data:{labels:ml,datasets:[
     {label:'Headline Inflation',data:sliceM(M.infl),borderColor:p.navy,borderWidth:2.6,pointRadius:0,tension:.35},
@@ -1521,19 +1528,19 @@ function renderBankCompare(){
   const B=[...BANKS].sort((x,y)=>y.a1-x.a1);
   // --- scorecard table with per-column conditional formatting ---
   const cols=[
-    ['Total assets ($mn)',b=>b.a1,b=>0,+1,0],
-    ['Assets Δ y/y (%)',b=>pc(b.a0,b.a1),b=>0,+1,1],
-    ['Loans ($mn)',b=>b.l1,b=>0,0,0],
-    ['Deposits ($mn)',b=>b.d1,b=>0,0,0],
-    ['Net profit ($mn)',b=>b.p1,b=>0,+1,1],
-    ['Profit Δ y/y (%)',b=>pc(b.p0,b.p1),b=>0,+1,1],
-    ['ROA (%)',b=>b.roa,b=>b.roaC,+1,2],
-    ['ROE (%)',b=>b.roe,b=>b.roeC,+1,1],
-    ['NPL (%)',b=>b.npl,b=>b.nplC,-1,2],
-    ['CAR (%)',b=>b.car,b=>0,+1,1],
-    ['Loan/Deposit (%)',b=>b.ldr,b=>b.ldrC,0,1],
-    ['Cost/Income (%)',b=>b.ci,b=>0,-1,1]];
-  let html='<tr><th>Bank</th>'+cols.map(c=>`<th style="text-align:right">${c[0]}</th>`).join('')+'</tr>';
+    ['Total assets ($mn)',b=>b.a1,b=>0,+1,0,'bc_assets'],
+    ['Assets Δ y/y (%)',b=>pc(b.a0,b.a1),b=>0,+1,1,'bc_assets'],
+    ['Loans ($mn)',b=>b.l1,b=>0,0,0,'bc_ld'],
+    ['Deposits ($mn)',b=>b.d1,b=>0,0,0,'bc_ld'],
+    ['Net profit ($mn)',b=>b.p1,b=>0,+1,1,'bc_prof'],
+    ['Profit Δ y/y (%)',b=>pc(b.p0,b.p1),b=>0,+1,1,'bc_prof'],
+    ['ROA (%)',b=>b.roa,b=>b.roaC,+1,2,'bc_prof'],
+    ['ROE (%)',b=>b.roe,b=>b.roeC,+1,1,'bc_prof'],
+    ['NPL (%)',b=>b.npl,b=>b.nplC,-1,2,'b_npl'],
+    ['CAR (%)',b=>b.car,b=>0,+1,1,'b_car'],
+    ['Loan/Deposit (%)',b=>b.ldr,b=>b.ldrC,0,1,'b_liq'],
+    ['Cost/Income (%)',b=>b.ci,b=>0,-1,1,'b_eff']];
+  let html='<tr><th>Bank</th>'+cols.map(c=>`<th class="sc-link" style="text-align:right" title="View chart →" onclick="goTo('banking','${c[5]}')">${c[0]}</th>`).join('')+'</tr>';
   const colVals=cols.map(c=>B.map(b=>c[1](b)));
   html+=B.map((b,ri)=>{
     return `<tr><td style="font-weight:700">${b.n}</td>`+cols.map((c,ci)=>{
@@ -2227,13 +2234,15 @@ function pageBanking(){
     ['nsfr','Net Stable Funding Ratio','--royal',false],
     ['nopfx','Net Open Position in Foreign Exchange to Capital','--navy2',true],
   ];
+  const NAVB={car:'b_car',tier1:'b_car',cet1:'b_car',t1a:'b_car',nplnet:'b_npl',npl:'b_npl',prov:'b_npl',roa:'b_prof',roe:'b_prof',nim:'b_prof',nix:'b_eff',liq_a:'b_liq',liq_st:'b_liq',lcr:'b_liq',nsfr:'b_liq',nopfx:'b_nop'};
   document.getElementById('b_cards').innerHTML=defs.map(([k,l,c,bad])=>{
+    const tgt=NAVB[k], la=tgt?` class="kpi kpi-link" title="View chart \u2192" onclick="goTo('banking','${tgt}')"`:' class="kpi"';
     const o=lastQ(k);
-    if(!o||o.v==null) return `<div class="kpi" style="--kc:var(${c})"><div class="lbl">${l}</div><div class="val" style="color:var(--text2)">n/a</div><div class="meta"><span>not yet reported</span></div></div>`;
+    if(!o||o.v==null) return `<div${la} style="--kc:var(${c})"><div class="lbl">${l}</div><div class="val" style="color:var(--text2)">n/a</div><div class="meta"><span>not yet reported</span></div></div>`;
     const ch=o.prev!=null?o.v-o.prev:null;
     const good=ch==null?null:(bad?ch<=0:ch>=0);
     const arr=ch==null?'':(ch>0?'\u25B2':ch<0?'\u25BC':'\u25AC');
-    return `<div class="kpi" style="--kc:var(${c})"><div class="period">${o.q}</div><div class="lbl">${l}</div><div class="val">${fmt(o.v)}<small>%</small></div><div class="meta"><span class="arrow ${ch==null?'flat':(Math.abs(ch)<1e-9?'flat':ch>0?'up':'down')}">${arr} ${ch==null?'':fmt(Math.abs(ch))}</span><span>y/y (vs same period last year)</span></div></div>`;
+    return `<div${la} style="--kc:var(${c})"><div class="period">${o.q}</div><div class="lbl">${l}</div><div class="val">${fmt(o.v)}<small>%</small></div><div class="meta"><span class="arrow ${ch==null?'flat':(Math.abs(ch)<1e-9?'flat':ch>0?'up':'down')}">${arr} ${ch==null?'':fmt(Math.abs(ch))}</span><span>y/y (vs same period last year)</span></div></div>`;
   }).join('');
   const L=(k,lab,col,extra={})=>Object.assign({label:lab,data:S[k],borderColor:col,borderWidth:2.2,pointRadius:2,pointBackgroundColor:col,tension:.3,spanGaps:true},extra);
   mk('b_car',{type:'line',data:{labels:fl,datasets:[
@@ -2533,17 +2542,18 @@ function pageCGO(){
      const mLab=monLab(md[last]);
      const at=(a,i)=>(a&&i>=0&&i<a.length)?a[i]:null;
      const pi=md.indexOf((+md[last].slice(0,4)-1)+md[last].slice(4));
-     const card=(l,a,c2,inv)=>{const v=at(a,last),pv=at(a,pi);
+     const card=(l,a,c2,inv,tgt)=>{const v=at(a,last),pv=at(a,pi);
        const ch=(v!=null&&pv!=null)?v-pv:null;
        const good=ch==null?null:(inv?ch<=0:ch>=0);
        const arr=ch==null?'':(ch>0?'▲':ch<0?'▼':'▬');
-       return `<div class="kpi" style="--kc:var(${c2})"><div class="period">${mLab}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':'$'+fmt0(v)}<small> mn</small></div><div class="meta"><span class="arrow ${ch==null?'flat':(good?'up':'down')}">${arr} ${ch==null?'':'$'+fmt0(Math.abs(ch))+' mn'}</span><span>y/y (vs ${md[pi]?monLab(md[pi]):'—'})</span></div></div>`;};
+       const la=tgt?` class="kpi kpi-link" title="View chart →" onclick="goTo('cgo','${tgt}')"`:' class="kpi"';
+       return `<div${la} style="--kc:var(${c2})"><div class="period">${mLab}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':'$'+fmt0(v)}<small> mn</small></div><div class="meta"><span class="arrow ${ch==null?'flat':(good?'up':'down')}">${arr} ${ch==null?'':'$'+fmt0(Math.abs(ch))+' mn'}</span><span>y/y (vs ${md[pi]?monLab(md[pi]):'—'})</span></div></div>`;};
      kel.innerHTML=[
-       card('Revenue',S.Revenue,'--emerald',false),
-       card('Expenditure (incl. capital)',expend,'--red',true),
-       card('Net Lending/Borrowing',S['Net lending/borrowing'],'--royal',false),
-       card('Net Operating Balance',S['Net operating balance'],'--gold',false),
-       card('Capital Spending (NAFA)',S['Net acq. nonfinancial assets'],'--navy2',false),
+       card('Revenue',S.Revenue,'--emerald',false,'cgo_rev'),
+       card('Expenditure (incl. capital)',expend,'--red',true,'cgo_exp'),
+       card('Net Lending/Borrowing',S['Net lending/borrowing'],'--royal',false,'cgo_bal'),
+       card('Net Operating Balance',S['Net operating balance'],'--gold',false,'cgo_bal'),
+       card('Capital Spending (NAFA)',S['Net acq. nonfinancial assets'],'--navy2',false,'cgo_op'),
      ].join('');
    }}
   mk('cgo_op',{type:'line',data:{labels:clab,datasets:[
