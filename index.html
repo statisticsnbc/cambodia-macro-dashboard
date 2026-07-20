@@ -1191,8 +1191,10 @@ function rsTourismInit(){
     // makes the growth rate meaningless (recovery from a near-zero base) and its scale
     // would flatten the entire right axis
     const tourG=ts(M.tour_g).map((v,i)=>(D.mdates[t0+i]>=YOY_FROM)?v:null);
-    mk('rs_tour',{type:'bar',data:{labels:tourLab,datasets:[
-      {label:'Tourist Arrivals',data:ts(M.tour),backgroundColor:p.royal+'B3',borderRadius:3,yAxisID:'y'},
+    mk('rs_tour',{type:'line',data:{labels:tourLab,datasets:[
+      {label:'Tourist Arrivals',data:ts(M.tour),type:'line',fill:'origin',
+       backgroundColor:grad('rs_tour',p.royal,.42),borderColor:p.royal,borderWidth:2,
+       pointRadius:0,tension:.3,yAxisID:'y'},
       {label:'Year-on-Year Growth (%)',type:'line',data:tourG,borderColor:p.emerald,borderWidth:2.2,pointRadius:0,tension:.3,yAxisID:'y2',spanGaps:false}]},
       options:Object.assign(baseOpts(),{scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>fmt0(v/1000)+'k'}},y2:{position:'right',grid:{display:false},ticks:{color:p.emerald,callback:v=>v+'%'}}}})});
   }
@@ -1214,8 +1216,10 @@ function rsTourismInit(){
       // same concept as International Tourist Arrivals: monthly bars + y/y growth line (right axis)
       const yoyA=A.values.map((v,i)=>(i>=12&&v!=null&&A.values[i-12]&&A.dates[i]>=YOY_FROM)
         ?+((v/A.values[i-12]-1)*100).toFixed(2):null);
-      mk('r_angkor',{type:'bar',data:{labels:A.dates.map(monLab),datasets:[
-        {label:'Tickets Sold',data:A.values,backgroundColor:p.royal+'B3',borderRadius:3,yAxisID:'y'},
+      mk('r_angkor',{type:'line',data:{labels:A.dates.map(monLab),datasets:[
+        {label:'Tickets Sold',data:A.values,type:'line',fill:'origin',
+         backgroundColor:grad('r_angkor',p.royal,.42),borderColor:p.royal,borderWidth:2,
+         pointRadius:0,tension:.3,spanGaps:false,yAxisID:'y'},
         {label:'Year-on-Year Growth (%)',type:'line',data:yoyA,borderColor:p.emerald,borderWidth:2.2,pointRadius:0,tension:.3,yAxisID:'y2',spanGaps:false}]},
         options:Object.assign(baseOpts(),{scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>fmt0(v/1000)+'k'}},y2:{position:'right',grid:{display:false},ticks:{color:p.emerald,callback:v=>v+'%'}}}})});
       const withData=A.dates.map((d,i)=>({d,v:A.values[i]})).filter(o=>o.v!=null);
@@ -1380,8 +1384,7 @@ function gtrendInit(){
       +'<b>planning</b> a trip, which is why the series can move before arrivals do — but a search '
       +'is not a booking, and interest in a destination can rise without translating into visits.';
   }
-  if(src) src.textContent='Source: Google Trends; Ministry of Tourism. Both series are 3-month moving averages. '
-    +'The correlation is computed over the window currently displayed, so it changes with the range and lead selected.';
+  if(src) src.textContent='Source: Google Trends';
 }
 function pageReal(){
   ntlInit();
@@ -1711,8 +1714,10 @@ function pageExternal(){
   {const t0=D.mdates.indexOf('2019-01'), ts=a=>t0>=0?a.slice(t0):a;
    const tourLab=ts(D.mdates).map(monLab);
    const tourG=ts(M.tour_g).map((v,i)=>(D.mdates[t0+i]>='2023-01')?v:null);
-   mk('r_tour',{type:'bar',data:{labels:tourLab,datasets:[
-     {label:'Tourist Arrivals',data:ts(M.tour),backgroundColor:p.royal+'B3',borderRadius:3,yAxisID:'y'},
+   mk('r_tour',{type:'line',data:{labels:tourLab,datasets:[
+     {label:'Tourist Arrivals',data:ts(M.tour),type:'line',fill:'origin',
+      backgroundColor:grad('r_tour',p.royal,.42),borderColor:p.royal,borderWidth:2,
+      pointRadius:0,tension:.3,yAxisID:'y'},
      {label:'Year-on-Year Growth (%)',type:'line',data:tourG,borderColor:p.emerald,borderWidth:2.2,pointRadius:0,tension:.3,yAxisID:'y2',spanGaps:false}]},
      options:Object.assign(baseOpts(),{scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>fmt0(v/1000)+'k'}},y2:{position:'right',grid:{display:false},ticks:{color:p.emerald,callback:v=>v+'%'}}}})});
    const tourS=Object.entries(D.tourCtry).sort((a,b)=>(b[1]??-Infinity)-(a[1]??-Infinity));
