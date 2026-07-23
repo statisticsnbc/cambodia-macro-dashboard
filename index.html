@@ -28,6 +28,7 @@
 <title>Cambodia Macroeconomic Dashboard — National Bank of Cambodia</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0/dist/chartjs-chart-treemap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700;800&display=swap');
 :root{
@@ -343,6 +344,20 @@ h1,h2,h3,.serif{font-family:'Source Serif 4',Georgia,serif}
 .rmd-hero{position:absolute;background:var(--romdoul) no-repeat center/contain;pointer-events:none;z-index:1}
 footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color:var(--text2);line-height:1.7}
 @media print{.nav,.hero-right,.png-btn,.toolbar,.rmd{display:none!important}.page{display:block!important;page-break-after:always}body{background:#fff}.card{box-shadow:none;break-inside:avoid}}
+.ig-card{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.ig-body{padding:20px 20px 15px;display:flex;flex-direction:column;flex:1}
+.ig-head{display:flex;gap:12px;margin-bottom:14px}
+.ig-vbar{flex:0 0 7px;border-radius:3px;align-self:stretch}
+.ig-kicker{font-size:10px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:5px}
+.ig-title{font-size:20.5px;font-weight:800;line-height:1.18;color:var(--text);margin:0;letter-spacing:-.5px}
+.ig-hero{display:flex;align-items:baseline;gap:9px;margin-bottom:14px}
+.ig-stat{font-size:38px;line-height:.95;font-weight:800;letter-spacing:-1.6px;white-space:nowrap}
+.ig-statlbl{font-size:11px;color:var(--text2);font-weight:600;line-height:1.32}
+.ig-card .ig-ch{height:150px;margin-bottom:14px}
+.ig-callout{font-size:11.5px;line-height:1.55;color:var(--text);border-radius:0 10px 10px 0;padding:11px 14px;flex:1;border-left:3px solid var(--line)}
+.ig-callout b{font-weight:800}
+.ig-src{font-size:10px;color:var(--text2);font-weight:600;margin-top:13px;padding-top:9px;border-top:1px solid var(--line)}
+@media(max-width:1100px){.ig-card .ig-ch{height:168px}}
 </style>
 </head>
 <body>
@@ -412,8 +427,8 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
     <div class="tab" data-p="cross"><span class="ico">∿</span>Forecast</div>
     <div class="tab" data-p="compare"><span class="ico"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%232B4B9B'/%3E%3Ccircle cx='12' cy='12' r='8.6' fill='none' stroke='%23fff' stroke-width='0.7'/%3E%3Cg stroke='%23FCD116' stroke-width='1' stroke-linecap='round'%3E%3Cline x1='12' y1='6.2' x2='12' y2='15.6'/%3E%3Cline x1='9.6' y1='7.2' x2='10.6' y2='15.6'/%3E%3Cline x1='14.4' y1='7.2' x2='13.4' y2='15.6'/%3E%3Cline x1='8' y1='8.6' x2='9.4' y2='15.6'/%3E%3Cline x1='16' y1='8.6' x2='14.6' y2='15.6'/%3E%3C/g%3E%3Cline x1='9' y1='15.8' x2='15' y2='15.8' stroke='%23FCD116' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E" alt="ASEAN" style="width:15px;height:15px;vertical-align:-2px"></span>Comparison</div>
     <div class="tab" data-p="risk"><span class="ico">▲</span>Risk Monitor</div>
-    <div class="tab" data-p="others"><span class="ico">▦</span>Others</div>
     <div class="tab" data-p="cotd"><span class="ico">◫</span>Infographic</div>
+    <div class="tab" data-p="others"><span class="ico">▦</span>Others</div>
   </div>
   <div class="toolbar">
     <div class="range" id="range">
@@ -1000,27 +1015,8 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
 </div></div>
 <div class="page" id="p-cotd"><div class="wrap">
   <div class="sec-title serif">Infographic</div>
-  <div class="sec-sub">Chart of the Day — one figure worth a second look, from Cambodia's own statistics</div>
-  <div class="grid">
-    <div class="card c12" id="card_cotd">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:2px">
-        <div style="display:flex;align-items:center;gap:9px">
-          <span style="font-size:10.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--royal);border:1.5px solid var(--royal);border-radius:6px;padding:2px 8px">Chart of the Day</span>
-          <span id="cotd_date" style="font-size:11.5px;color:var(--text2);font-weight:600"></span>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button id="cotd_prev" class="range" style="cursor:pointer;padding:5px 12px;font-size:12px;font-weight:700;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:8px;font-family:inherit">‹ Prev</button>
-          <button id="cotd_next" class="range" style="cursor:pointer;padding:5px 12px;font-size:12px;font-weight:700;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:8px;font-family:inherit">Next ›</button>
-        </div>
-      </div>
-      <h2 id="cotd_head" class="serif" style="margin:8px 0 3px;font-size:23px;line-height:1.2;color:var(--text);font-weight:800"></h2>
-      <div id="cotd_sub" style="font-size:13px;color:var(--text2);margin-bottom:12px"></div>
-      <div class="ch" style="height:420px"><canvas id="cotd_chart"></canvas></div>
-      <div id="cotd_take" style="font-size:12.5px;line-height:1.6;color:var(--text);background:var(--card2);border-left:3px solid var(--royal);border-radius:0 10px 10px 0;padding:10px 14px;margin-top:12px"></div>
-      <div class="src" id="cotd_src" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px"><span id="cotd_srctext"></span><span style="font-weight:700;color:var(--text2)">National Bank of Cambodia · Statistics Department</span></div>
-      <div id="cotd_dots" style="display:flex;gap:6px;justify-content:center;margin-top:12px"></div>
-    </div>
-  </div>
+  <div class="sec-sub">Five figures worth a second look, drawn from Cambodia's own official statistics</div>
+  <div class="grid" id="cotd_grid"></div>
 </div></div>
 
 <footer><div class="wrap">
@@ -3925,77 +3921,132 @@ function chhukInit(){
     +'Village areas are Voronoi approximations of the village points, not official village boundaries.';
 }
 /* ---------- Infographic: Statista-style Chart of the Day ---------- */
-let COTD_I=null;
+function hexA(c,a){
+  c=(''+c).trim();
+  if(c[0]==='#'){ if(c.length===4){c='#'+c[1]+c[1]+c[2]+c[2]+c[3]+c[3];}
+    var n=parseInt(c.slice(1),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }
+  var m=c.match(/rgba?\(([^)]+)\)/); if(m){var s=m[1].split(',');return 'rgba('+s[0].trim()+','+s[1].trim()+','+s[2].trim()+','+a+')';}
+  return c;
+}
 function cotdSet(){
   const p=P(), F=D.provFin, y=F?F.years[0]:2025;
-  const loans=F?Object.entries(F.data[y]).map(([k,v])=>[k,v.loans/1000]).sort((a,b)=>b[1]-a[1]).slice(0,8):[];
+  let ppShare=57, loans=[];
+  if(F){ const ent=Object.entries(F.data[y]).map(([k,v])=>[k,v.loans/1000]);
+    const tot=ent.reduce((s,o)=>s+o[1],0);
+    ent.sort((a,b)=>b[1]-a[1]);
+    if(tot>0&&ent.length) ppShare=Math.round(ent[0][1]/tot*100);
+    loans=ent.slice(0,8); }
   const imp=D.impCtry?Object.entries(D.impCtry).filter(([k,v])=>v!=null).sort((a,b)=>b[1]-a[1]).slice(0,7):[];
   const cas=D.casino?Object.entries(D.casino.byRegion):[];
+  const casTot=cas.reduce((s,o)=>s+o[1],0);
   const W=D.minwage?D.minwage.kh_series:null;
-  const sez=D.sez?[['Operating',D.sez.byStatus['Operating']||0],['Under development',D.sez.byStatus['Under development']||0],['Approved, not yet operating',D.sez.byStatus['Approved / not yet operating']||0]]:[];
+  const wLast=(W&&W.usd&&W.usd.length)?W.usd[W.usd.length-1]:210;
+  const wYr=(W&&W.years&&W.years.length)?W.years[W.years.length-1]:2026;
+  const wYr0=(W&&W.years&&W.years.length)?W.years[0]:2012;
+  const sez=D.sez?[['Operating',D.sez.byStatus['Operating']||0],['Under development',D.sez.byStatus['Under development']||0],['Approved, not running',D.sez.byStatus['Approved / not yet operating']||0]]:[];
+  const sezTot=sez.reduce((s,o)=>s+o[1],0), sezOp=sez.length?sez[0][1]:0;
   const usd=v=>'$'+fmt(v,v<10?1:0)+'bn', pc=v=>fmt(v,1)+'%';
+  const WM={
+    bank:'<svg viewBox="0 0 100 100" fill="currentColor"><path d="M50 8 6 30v8h88v-8L50 8zm0 10 26 12H24l26-12zM16 44h10v34H16zM35 44h10v34H35zM54 44h10v34H54zM73 44h10v34H73zM8 82h84v9H8z"/></svg>',
+    ship:'<svg viewBox="0 0 100 100" fill="currentColor"><path d="M24 38h52v24H24z"/><path d="M32 22h14v14H32zM52 22h14v14H52z"/><path d="M6 66h88l-11 24H17L6 66z"/></svg>',
+    chip:'<svg viewBox="0 0 100 100" fill="currentColor"><path d="M50 6a44 44 0 100 88 44 44 0 000-88zm0 14a30 30 0 110 60 30 30 0 010-60zM46 4h8v16h-8zM46 80h8v16h-8zM4 46h16v8H4zM80 46h16v8H80z"/><circle cx="50" cy="50" r="15"/></svg>',
+    shirt:'<svg viewBox="0 0 100 100" fill="currentColor"><path d="M38 10 20 20 8 40l14 10 6-6v46h44V44l6 6 14-10L80 20 62 10a12 12 0 01-24 0z"/></svg>',
+    factory:'<svg viewBox="0 0 100 100" fill="currentColor"><path d="M8 46l22-13v11l22-13v11l22-13v55H8z"/><path d="M74 32h9V14h9v78h-9V44l-9 5z"/></svg>'
+  };
   return [
-    {head:'Phnom Penh dominates Cambodia’s bank lending',
-     sub:'Outstanding bank loans by city-province, '+y+' (US$ billion)',
-     take:'The capital holds about 57% of all bank loans in the country — more than the next twenty provinces combined — underscoring how concentrated formal credit remains.',
-     src:'Source: National Bank of Cambodia — Banking Supervision.',
-     type:'hbar',labels:loans.map(o=>o[0]),data:loans.map(o=>+o[1].toFixed(2)),color:p.royal,fmt:usd},
-    {head:'China supplies over half of Cambodia’s imports',
-     sub:'Share of merchandise imports by country of origin, first half of 2026',
-     take:'China alone accounts for 54% of imports — machinery, materials and consumer goods — far ahead of Singapore and Vietnam, leaving import demand highly concentrated on one partner.',
-     src:'Source: General Department of Customs and Excise.',
-     type:'hbar',labels:imp.map(o=>o[0]),data:imp.map(o=>o[1]),color:p.amber,fmt:pc},
-    {head:'Cambodia’s casinos hug the borders',
-     sub:'Number of licensed and registered casinos by region',
-     take:'Casino gambling is legal only for foreigners, so venues cluster where cross-border visitors arrive — the Thai border (Poipet, Pailin), the Vietnam border (Bavet) and the Sihanoukville coast.',
-     src:'Source: Commercial Gambling Management Commission of Cambodia.',
-     type:'hbar',labels:cas.map(o=>o[0]),data:cas.map(o=>o[1]),color:p.red,fmt:v=>fmt0(v)},
-    {head:'The minimum wage has more than doubled since 2014',
-     sub:'Garment-sector monthly minimum wage (US$)',
-     take:'From $100 in 2014 to $210 in 2026, the garment minimum wage rose fast in the 2010s and has since flattened — the 2026 rise was about 1%.',
-     src:'Source: Ministry of Labour and Vocational Training.',
-     type:'col',labels:W?W.years.map(String):[],data:W?W.usd:[],color:p.emerald,fmt:v=>'$'+fmt0(v)},
-    {head:'Most special economic zones are approved but not yet running',
-     sub:'Cambodia’s 71 special economic zones, by operating status',
-     take:'Only 22 of 71 approved zones are operating; a further 16 are under development and 33 remain approved-only — a pipeline still far larger than the active base.',
-     src:'Source: Open Development Cambodia (OD Mekong Datahub).',
-     type:'hbar',labels:sez.map(o=>o[0]),data:sez.map(o=>o[1]),color:p.gold,fmt:v=>fmt0(v)},
+    {icon:WM.bank,badge:'Credit',period:String(y),color:p.royal,
+     stat:ppShare+'%',statLbl:'of all bank loans are held in Phnom Penh',
+     head:'Phnom Penh dominates Cambodia’s bank lending',
+     take:'The capital holds about '+ppShare+'% of national bank loans, more than the next twenty provinces combined, underscoring how concentrated formal credit remains.',
+     src:'Source: National Bank of Cambodia',
+     type:'hbar',labels:loans.map(o=>o[0]),data:loans.map(o=>+o[1].toFixed(2)),fmt:usd},
+    {icon:WM.ship,badge:'Trade',period:'H1 2026',color:p.amber,
+     stat:(imp.length?fmt(imp[0][1],0):'54')+'%',statLbl:'of merchandise imports come from China (H1 2026)',
+     head:'China supplies over half of Cambodia’s imports',
+     take:'China alone accounts for over half of imports (machinery, materials and consumer goods), far ahead of Singapore and Vietnam, leaving import demand highly concentrated on one partner.',
+     src:'Source: General Department of Customs and Excise',
+     type:'hbar',labels:imp.map(o=>o[0]),data:imp.map(o=>o[1]),fmt:pc},
+    {icon:WM.chip,badge:'Gaming',period:'2026',color:p.red,
+     stat:fmt0(casTot),statLbl:'licensed casinos, clustered on the borders and coast',
+     head:'Cambodia’s casinos hug the borders',
+     take:'Casino gambling is legal only for foreigners, so venues cluster where cross-border visitors arrive: the Thai border (Poipet, Pailin), the Vietnam border (Bavet) and the Sihanoukville coast.',
+     src:'Source: Commercial Gambling Management Commission',
+     type:'hbar',labels:cas.map(o=>o[0]),data:cas.map(o=>o[1]),fmt:v=>fmt0(v)},
+    {icon:WM.shirt,badge:'Labour',period:wYr0+' to '+wYr,color:p.emerald,
+     stat:'$'+fmt0(wLast),statLbl:'garment minimum wage in '+wYr+', up from $100 in 2014',
+     head:'The minimum wage has more than doubled since 2014',
+     take:'From $100 in 2014 to $'+fmt0(wLast)+' in '+wYr+', the garment minimum wage rose fast in the 2010s and has since flattened; the '+wYr+' rise was about 1%.',
+     src:'Source: Ministry of Labour and Vocational Training',
+     type:'col',labels:W?W.years.map(String):[],data:W?W.usd:[],fmt:v=>'$'+fmt0(v)},
+    {icon:WM.factory,badge:'Investment',period:'2026',color:p.gold,
+     stat:fmt0(sezOp)+'/'+fmt0(sezTot),statLbl:'special economic zones are actually operating',
+     head:'Most special economic zones are approved but not yet running',
+     take:'Only '+fmt0(sezOp)+' of '+fmt0(sezTot)+' approved zones are operating; the rest are under development or approved only, a pipeline still far larger than the active base.',
+     src:'Source: Open Development Cambodia',
+     type:'hbar',labels:sez.map(o=>o[0]),data:sez.map(o=>o[1]),fmt:v=>fmt0(v)},
   ].filter(c=>c.data&&c.data.length);
 }
-function pageCOTD(){
-  const set=cotdSet(); if(!set.length){const c=document.getElementById('card_cotd');if(c)c.style.display='none';return;}
-  if(COTD_I==null){ const day=Math.floor(Date.now()/864e5); COTD_I=((day%set.length)+set.length)%set.length; }
-  const pv=document.getElementById('cotd_prev'), nx=document.getElementById('cotd_next');
-  if(pv&&!pv.dataset.ready){pv.dataset.ready='1';pv.onclick=()=>{COTD_I=(COTD_I-1+set.length)%set.length;cotdDraw();};}
-  if(nx&&!nx.dataset.ready){nx.dataset.ready='1';nx.onclick=()=>{COTD_I=(COTD_I+1)%set.length;cotdDraw();};}
-  cotdDraw();
+function igCardPng(el,filename){
+  if(typeof html2canvas!=='function'){ alert('PNG export is still loading, please try again in a moment.'); return; }
+  const btns=el.querySelectorAll('.png-btn'); btns.forEach(b=>b.style.visibility='hidden');
+  const bg=getComputedStyle(el).backgroundColor;
+  html2canvas(el,{scale:Math.max(2,window.devicePixelRatio||1),backgroundColor:bg,logging:false,useCORS:true})
+    .then(cv=>{ btns.forEach(b=>b.style.visibility=''); const a=document.createElement('a'); a.download=filename; a.href=cv.toDataURL('image/png'); a.click(); })
+    .catch(()=>{ btns.forEach(b=>b.style.visibility=''); });
 }
-function cotdDraw(){
-  const set=cotdSet(), c=set[COTD_I], p=P();
-  document.getElementById('cotd_head').textContent=c.head;
-  document.getElementById('cotd_sub').textContent=c.sub;
-  document.getElementById('cotd_take').innerHTML='<b>The takeaway.</b> '+c.take;
-  const sp=document.getElementById('cotd_srctext'); if(sp)sp.textContent=c.src;
-  const dt=document.getElementById('cotd_date');
-  if(dt)dt.textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  const dots=document.getElementById('cotd_dots');
-  if(dots)dots.innerHTML=set.map((_,i)=>`<span style="width:8px;height:8px;border-radius:50%;background:${i===COTD_I?p.royal:p.line};display:inline-block"></span>`).join('');
-  // value labels drawn at the end of each bar / on top of each column
-  const lbl={id:'cotdLbl',afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);
-    g.save();g.font='700 12px Inter,sans-serif';g.fillStyle=P().text;
-    m.data.forEach((el,i)=>{const v=c.data[i];const t=c.fmt(v);
-      if(c.type==='hbar'){g.textAlign='left';g.textBaseline='middle';g.fillText(t,el.x+7,el.y);}
+function pageCOTD(){
+  const set=cotdSet(), grid=document.getElementById('cotd_grid');
+  if(!grid) return;
+  if(!set.length){ grid.innerHTML=''; return; }
+  grid.innerHTML=set.map((c,i)=>
+    '<div class="card c4 ig-card">'
+    +'<div class="ig-body">'
+      +'<div class="ig-head">'
+        +'<span class="ig-vbar" style="background:'+c.color+'"></span>'
+        +'<div>'
+          +'<div class="ig-kicker" style="color:'+c.color+'">'+c.badge+' <span class="ig-period">· '+c.period+'</span></div>'
+          +'<h3 class="ig-title">'+c.head+'</h3>'
+        +'</div>'
+      +'</div>'
+      +'<div class="ig-hero">'
+        +'<span class="ig-stat" style="color:'+c.color+'">'+c.stat+'</span>'
+        +'<span class="ig-statlbl">'+c.statLbl+'</span>'
+      +'</div>'
+      +'<div class="ch ig-ch"><canvas id="ig'+i+'"></canvas></div>'
+      +'<div class="ig-callout" style="border-left-color:'+c.color+';background:'+hexA(c.color,.06)+'">'+c.take+'</div>'
+      +'<div class="ig-src">'+c.src+'</div>'
+    +'</div></div>').join('');
+  const cards=grid.querySelectorAll('.ig-card');
+  set.forEach((c,i)=>{
+    cotdDraw('ig'+i,c);
+    const el=cards[i]; if(!el) return;
+    const fn=(c.badge+'_'+c.head).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,44)+'.png';
+    const b=document.createElement('button'); b.className='png-btn'; b.textContent='PNG ↓';
+    b.onclick=()=>igCardPng(el,fn);
+    el.appendChild(b);
+  });
+}
+function cotdDraw(id,c){
+  const p=P(), horiz=c.type==='hbar';
+  let emph=0, mx=-Infinity; c.data.forEach((v,i)=>{ if(v>mx){mx=v;emph=i;} });
+  const cols=c.data.map((v,i)=> i===emph ? c.color : hexA(c.color,.34));
+  const many=(!horiz && c.data.length>8);
+  const lbl={id:'igl_'+id,afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);
+    g.save();g.font='800 10.5px Inter,sans-serif';
+    m.data.forEach((el,i)=>{ if(many && i!==emph) return; const t=c.fmt(c.data[i]); g.fillStyle=(i===emph)?c.color:P().text;
+      if(horiz){g.textAlign='left';g.textBaseline='middle';g.fillText(t,el.x+6,el.y);}
       else{g.textAlign='center';g.textBaseline='bottom';g.fillText(t,el.x,el.y-5);}});
     g.restore();}};
-  const horiz=c.type==='hbar';
-  mk('cotd_chart',{type:'bar',plugins:[lbl],data:{labels:c.labels,datasets:[{data:c.data,
-      backgroundColor:c.color,borderRadius:5,barPercentage:.72,maxBarThickness:horiz?26:54}]},
-    options:Object.assign(baseOpts(),{indexAxis:horiz?'y':'x',layout:{padding:horiz?{right:64}:{top:22}},
+  const vgrid={display:true,color:p.line,drawTicks:false,lineWidth:1};
+  mk(id,{type:'bar',plugins:[lbl],data:{labels:c.labels,datasets:[{data:c.data,
+      backgroundColor:cols,borderRadius:1,barPercentage:.82,categoryPercentage:.86,maxBarThickness:horiz?16:34}]},
+    options:Object.assign(baseOpts(),{indexAxis:horiz?'y':'x',layout:{padding:horiz?{right:48}:{top:20}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>c.fmt(x.raw)}}},
       scales:horiz
-        ?{x:{grid:{color:p.line},border:{display:false},ticks:{display:false}},y:{grid:{display:false},ticks:{color:p.text,font:{size:12,weight:'600'}}}}
-        :{x:{grid:{display:false},ticks:{color:p.text2,font:{size:11}}},y:{grid:{color:p.line},border:{display:false},ticks:{display:false}}}})});
+        ?{x:{grid:vgrid,border:{display:false},ticks:{display:false}},y:{grid:{display:false},border:{display:false},ticks:{color:p.text,font:{size:10.5,weight:'700'}}}}
+        :{x:{grid:{display:false},border:{display:false},ticks:{color:p.text2,font:{size:9.5},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:vgrid,border:{display:false},ticks:{display:false}}}})});
 }
+
 const PAGES={overview:pageOverview,real:pageReal,external:pageExternal,monetary:pageMonetary,banking:pageBanking,rppi:pageRPPI,fiscal:pageFiscal,cgo:pageCGO,cross:function(){/* Forecast — empty for now */},compare:pageCompare,risk:pageRisk,others:pageOthers,cotd:pageCOTD};
 const rendered={};
 // ---- Live AI "Ask" box for each insight panel (works when opened as a Cowork artifact) ----
