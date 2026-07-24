@@ -869,7 +869,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
       <div class="src" id="pf_src">Source: National Bank of Cambodia — Banking Supervision</div></div>
     <div class="card c6"><h3>Total Assets</h3><div class="cs">Twenty Largest Commercial Banks — Million USD, 2024 vs 2025 (sorted by size)</div><div class="ch"><canvas id="bc_assets"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
     <div class="card c6"><h3>Loans and Deposits — 2025</h3><div class="cs">Loan portfolio vs customer deposits (Million USD); line = loan-to-deposit ratio (%)</div><div class="ch"><canvas id="bc_ld"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
-    <div class="card c6"><h3>Profitability — Net Profit and ROA</h3><div class="cs">Net Profit (Million USD, bars, 2024 vs 2025) and Return on Assets (%, line, right)</div><div class="ch"><canvas id="bc_prof"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
+    <div class="card c6"><h3>Bank Risk–Return Matrix</h3><div class="cs">Each bubble is one institution · x: NPL ratio (credit risk) · y: return on assets · bubble size: total assets (2025)</div><div class="ch"><canvas id="bc_prof"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
     <div class="card c6"><h3>Asset Quality — NPL Ratio</h3><div class="cs">Nonperforming Loans to Total Loans (%), 2024 vs 2025</div><div class="ch"><canvas id="bc_risk"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
   </div>
   <div class="ai"><div id="bc_ai"></div><div id="b_ai" style="margin-top:16px;border-top:1px dashed var(--line);padding-top:14px"></div></div>
@@ -2235,11 +2235,7 @@ function casinoInit(){
   if(document.getElementById('casino_reg')){
     const regs=Object.keys(Z.byRegion);
     const cnt=(rg,st)=>Z.points.filter(z=>z.region===rg&&z.status===st).length;
-    mk('casino_reg',{type:'bar',data:{labels:regs,datasets:
-      ['Licensed','Suspended','Revoked'].map(st=>({label:st,data:regs.map(rg=>cnt(rg,st)),
-        backgroundColor:CASINO_COL[st],stack:'s',borderRadius:3}))},
-      options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:8,font:{size:10}}}},
-      scales:{x:{stacked:true,grid:{display:false},ticks:{color:p.text2}},y:{stacked:true,grid:{color:p.line},border:{display:false},ticks:{color:p.text2}}}})});
+    mk('casino_reg',{type:'doughnut',data:{labels:regs,datasets:[{data:regs.map(rg=>['Licensed','Suspended','Revoked'].reduce((s,st)=>s+(cnt(rg,st)||0),0)),backgroundColor:[p.royal,p.emerald,p.gold],borderColor:P().card,borderWidth:2,hoverOffset:6}]},options:Object.assign(baseOpts(),{cutout:'56%',plugins:{legend:{position:'right',labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:9,font:{size:11}}},tooltip:{callbacks:{label:c=>c.label+': '+fmt0(c.raw)+' casinos'}}}})});
   }
 }
 /* ---------- MEF public debt bulletin: four structure & risk charts ---------- */
@@ -2525,12 +2521,7 @@ function renderBankCompare(){
     {label:'Deposits',data:B.map(b=>b.d1),backgroundColor:p.emerald+'CC',borderRadius:5,order:2},
     {label:'Loan-to-deposit % (right)',type:'line',data:B.map(b=>b.ldr),borderColor:p.gold,borderWidth:2.2,pointRadius:3.5,pointBackgroundColor:p.gold,yAxisID:'y2',order:1,tension:.3}]},
     options:Object.assign(baseOpts(),{plugins:{legend:legOpt},scales:{x:{grid:{display:false},ticks:{color:p.text2}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2}},y2:{position:'right',grid:{display:false},ticks:{color:p.gold,callback:v=>v+'%'}}}})});
-  mk('bc_prof',{type:'bar',data:{labels:names,datasets:[
-    {label:'Net profit '+y0,data:B.map(b=>b.p0),backgroundColor:p.navy+'66',borderRadius:5,order:2},
-    {label:'Net profit '+y1,data:B.map(b=>b.p1),backgroundColor:p.emerald+'CC',borderRadius:5,order:2},
-    {label:'ROA '+y1+' % (right)',type:'line',data:B.map(b=>b.roa1),borderColor:p.gold,borderWidth:2.2,pointRadius:3.5,pointBackgroundColor:p.gold,yAxisID:'y2',order:1,tension:.3}]},
-    options:Object.assign(baseOpts(),{plugins:{legend:legOpt,tooltip:{callbacks:{label:c=>c.dataset.label.indexOf('ROA')===0?('ROA: '+fmt(c.raw,2)+'%'):(c.dataset.label+': $'+fmt(c.raw,1)+' mn')}}},
-    scales:{x:{grid:{display:false},ticks:{color:p.text2}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2}},y2:{position:'right',grid:{display:false},ticks:{color:p.gold,callback:v=>v+'%'}}}})});
+  mk('bc_prof',{type:'bubble',data:{datasets:[{data:B.filter(b=>b.npl1!=null&&b.roa1!=null).map(b=>({x:b.npl1,y:b.roa1,r:Math.min(30,Math.max(5,Math.sqrt(b.a1||1)/4)),n:b.n,a:b.a1})),backgroundColor:p.royal+'73',borderColor:p.royal,borderWidth:1.2,hoverBackgroundColor:p.gold+'99'}]},options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const o=c.raw;return o.n+' \u2014 NPL '+fmt(o.x,1)+'%, ROA '+fmt(o.y,2)+'%, assets $'+fmt0(o.a)+' mn';}}}},scales:{x:{title:{display:true,text:'NPL ratio (%)  \u2192 higher credit risk',color:p.text2,font:{size:10.5}},grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}},y:{title:{display:true,text:'Return on assets (%)  \u2192 more profitable',color:p.text2,font:{size:10.5}},grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});
   mk('bc_risk',{type:'bar',data:{labels:names,datasets:[
     {label:'NPL ratio '+y0,data:B.map(b=>b.npl0),backgroundColor:p.navy+'66',borderRadius:5},
     {label:'NPL ratio '+y1,data:B.map(b=>b.npl1),backgroundColor:p.red+'CC',borderRadius:5}]},
@@ -4045,19 +4036,23 @@ function cotdSet(){
   const fcdA=(D.M&&D.M.fcd)||[], mdA=D.mdates||[]; const fcdBy={}; mdA.forEach((dt,i)=>{ if(fcdA[i]!=null) fcdBy[String(dt).slice(0,4)]=fcdA[i]; });
   const fcdY=Object.keys(fcdBy).sort(); const fcdV=fcdY.map(yy=>+fcdBy[yy].toFixed(0)); const fcdLast=fcdV.length?fcdV[fcdV.length-1]:90;
 
+  const PCW=D.pcWB||[]; const pcV=PCW.slice(-11); const pcY=[]; { const startY=2025-(pcV.length-1); for(let k=0;k<pcV.length;k++) pcY.push(String(startY+k)); }
+  const LAB=D.labour||{}, infm=(LAB.informal!=null?LAB.informal:76.7);
+  const AN=D.angkor; let agY=[],agV=[];
+  if(AN&&AN.dates&&AN.values){ const by={}; AN.dates.forEach((d,i)=>{const v=AN.values[i]; if(v!=null){const y=String(d).slice(0,4); by[y]=(by[y]||0)+v;}}); ['2019','2020','2021','2022','2023','2024','2025'].forEach(y=>{ if(by[y]!=null){agY.push(y);agV.push(Math.round(by[y]/1000));} }); }
   return [
     {badge:'Real',period:'2019 to 2026',color:p.royal,stat:'4%',statLbl:'real GDP growth projected for 2026',
      head:'Growth is easing to about 4 percent',
      take:'After the pandemic contraction of 2020, the economy has settled into steady expansion of roughly 5 to 6 percent a year; the National Bank of Cambodia projects growth easing to about 4 percent in 2026.',
-     src:'Source: National Institute of Statistics',type:'col',labels:gy,data:gg,fmt:pc1},
+     src:'Source: National Institute of Statistics',type:'area',labels:gy,data:gg,fmt:pc1},
     {badge:'Prices',period:'2019 to 2026',color:p.amber,stat:pc1(inflLast),statLbl:'consumer price inflation, H1 2026 average (6 months)',
      head:'Inflation has picked up but stays contained',
      take:'Consumer prices spiked in 2022 on global food and fuel costs, eased to below 1 percent in 2024, and have since firmed again, staying within a manageable single-digit range.',
-     src:'Source: National Institute of Statistics',type:'col',labels:yl,data:infl,fmt:pc1},
+     src:'Source: National Institute of Statistics',type:'area',labels:yl,data:infl,fmt:pc1},
     {badge:'Labour',period:wYr0+' to '+wYr,color:p.emerald,stat:'$'+fmt0(wLast),statLbl:'garment minimum wage in '+wYr+', up from $100 in 2014',
      head:'The minimum wage has more than doubled since 2014',
      take:'From $100 in 2014 to $'+fmt0(wLast)+' in '+wYr+', the garment minimum wage rose fast in the 2010s and has since flattened; the '+wYr+' rise was about 1%.',
-     src:'Source: Ministry of Labour and Vocational Training',type:'col',labels:W?W.years.map(String):[],data:W?W.usd:[],fmt:v=>'$'+fmt0(v)},
+     src:'Source: Ministry of Labour and Vocational Training',type:'area',labels:W?W.years.map(String):[],data:W?W.usd:[],fmt:v=>'$'+fmt0(v)},
     {badge:'Tourism',period:'Jan to May 2026',color:p.royal,stat:pc1(tour.length?tour[0][1]:0),statLbl:'of foreign visitors came from China',
      head:'China and Vietnam send the most tourists',
      take:'The two neighbours together account for roughly half of all international arrivals, with long-haul markets such as the United States, United Kingdom and France making up much of the rest.',
@@ -4069,7 +4064,7 @@ function cotdSet(){
     {badge:'Investment',period:'2026',color:p.gold,stat:fmt0(sezOp)+'/'+fmt0(sezTot),statLbl:'special economic zones are actually operating',
      head:'Most special economic zones are approved but not yet running',
      take:'Only '+fmt0(sezOp)+' of '+fmt0(sezTot)+' approved zones are operating; the rest are under development or approved only, a pipeline still far larger than the active base.',
-     src:'Source: Open Development Cambodia',type:'hbar',labels:sez.map(o=>o[0]),data:sez.map(o=>o[1]),fmt:v=>fmt0(v)},
+     src:'Source: Open Development Cambodia',type:'donut',labels:sez.map(o=>o[0]),data:sez.map(o=>o[1]),fmt:v=>fmt0(v)},
     {badge:'Trade',period:'Jan to Jun 2026',color:p.amber,stat:pc1(exp.length?exp[0][1]:0),statLbl:'of merchandise exports go to the United States',
      head:'The United States is the top export market',
      take:'A single market takes more than 40 percent of exports, mostly garments, footwear and travel goods, leaving external demand heavily exposed to US trade policy.',
@@ -4089,7 +4084,7 @@ function cotdSet(){
     {badge:'Reserves',period:'Jun 2026',color:p.emerald,stat:pc1(res.length?res[0][1]:0),statLbl:'of official reserves are held in US dollars',
      head:'Foreign reserves are held mostly in US dollars',
      take:'The dollar makes up close to four fifths of official reserve holdings, with the Chinese yuan a distant second, reflecting the currency the economy actually trades and borrows in.',
-     src:'Source: National Bank of Cambodia',type:'hbar',labels:res.map(o=>o[0]),data:res.map(o=>o[1]),fmt:pc1},
+     src:'Source: National Bank of Cambodia',type:'donut',labels:res.map(o=>o[0]),data:res.map(o=>o[1]),fmt:pc1},
     {badge:'Reserves',period:'Q1 2026',color:p.royal,stat:fmt((lastv(Q.res_mo)!=null?lastv(Q.res_mo):7.3),1)+' mo',statLbl:'of import cover, well above the 3-month adequacy floor',
      head:'Reserves cover far more than three months of imports',
      take:'Official reserves are worth roughly '+fmt((lastv(Q.res_mo)!=null?lastv(Q.res_mo):7.3),1)+' months of imports, more than double the standard three-month adequacy benchmark, giving the economy a solid external buffer.',
@@ -4109,11 +4104,11 @@ function cotdSet(){
     {badge:'Monetary',period:'2018 to 2026',color:p.royal,stat:'$'+fmt(govUSDLast,1)+'bn',statLbl:'in central government deposits, USD (May 2026)',
      head:'Government deposits have climbed to a record',
      take:'Central government deposits held in the banking system have risen to about $'+fmt(govUSDLast,1)+' billion (roughly '+fmt0(govLast)+' trillion riel), up from around $4 billion in 2018, as revenue collection and cash buffers strengthened.',
-     src:'Source: National Bank of Cambodia, Depository Corporations Survey',type:'col',labels:govY,data:govUSD,fmt:v=>'$'+fmt(v,1)+'bn'},
+     src:'Source: National Bank of Cambodia, Depository Corporations Survey',type:'area',labels:govY,data:govUSD,fmt:v=>'$'+fmt(v,1)+'bn'},
     {badge:'Debt',period:'Q1 2026',color:p.red,stat:extSh+'%',statLbl:'of public debt is owed to external creditors',
      head:'Public debt is almost entirely external',
      take:'Government borrowing is overwhelmingly external and concessional, mostly bilateral and multilateral loans; domestic debt remains a very small share of the total stock.',
-     src:'Source: Ministry of Economy and Finance',type:'hbar',labels:['External','Domestic'],data:[extD!=null?+extD.toFixed(0):12701, domD!=null?+domD.toFixed(0):596],fmt:usdM},
+     src:'Source: Ministry of Economy and Finance',type:'donut',labels:['External','Domestic'],data:[extD!=null?+extD.toFixed(0):12701, domD!=null?+domD.toFixed(0):596],fmt:usdM},
     {badge:'Fiscal',period:'2026',color:p.amber,stat:pc1(balG),statLbl:'overall fiscal balance (% of GDP)',
      head:'Spending outpaces revenue, but the gap stays small',
      take:'Expenditure runs a little above revenue, leaving a modest deficit of around 2 percent of GDP, comfortably financed given low debt and concessional funding.',
@@ -4121,7 +4116,7 @@ function cotdSet(){
     {badge:'Dollarization',period:'Jun 2026',color:p.emerald,stat:pc0(fcdLast),statLbl:'of bank deposits are held in foreign currency (Jun 2026)',
      head:'Deposits remain overwhelmingly dollarized',
      take:'About nine tenths of bank deposits are held in US dollars, a deep dollarization that has barely shifted in years and limits how much independent monetary policy can do.',
-     src:'Source: National Bank of Cambodia',type:'col',labels:fcdY,data:fcdV,fmt:pc0},
+     src:'Source: National Bank of Cambodia',type:'area',labels:fcdY,data:fcdV,fmt:pc0},
     {badge:'Stability',period:'Q2 2026',color:p.emerald,stat:pc1(carV),statLbl:'system capital adequacy ratio, far above the 15% minimum',
      head:'Banks hold capital well above the minimum',
      take:'The banking system’s capital adequacy ratio stands near '+fmt(carV,1)+' percent, comfortably above the 15 percent regulatory floor, leaving lenders a sizeable buffer against shocks.',
@@ -4133,11 +4128,11 @@ function cotdSet(){
     {badge:'Oil',period:'H1 2026',color:p.amber,stat:'$87',statLbl:'average Brent crude price, H1 2026 (US$/barrel)',
      head:'Global oil prices jumped again in early 2026',
      take:'After easing through 2025, Brent crude spiked back toward $100 a barrel in March to May 2026 before settling near $84, a swing driven by supply risks and shifting demand that ripples through global transport and food costs.',
-     src:'Source: FRED, IMF Primary Commodity Prices',type:'col',labels:['2020','2021','2022','2023','2024','2025','2026'],data:[43,71,99,82,80,68,87],fmt:v=>'$'+fmt0(v)},
+     src:'Source: FRED, IMF Primary Commodity Prices',type:'area',labels:['2020','2021','2022','2023','2024','2025','2026'],data:[43,71,99,82,80,68,87],fmt:v=>'$'+fmt0(v)},
     {badge:'Food',period:'H1 2026',color:p.emerald,stat:'134',statLbl:'world food price index, H1 2026 (2016 = 100)',
      head:'World food prices are off their 2022 peak',
      take:'The global food price index has fallen back from its 2022 record but remains well above pre-pandemic levels, as weather, energy costs and trade frictions keep world food markets volatile.',
-     src:'Source: FRED, IMF Primary Commodity Prices',type:'col',labels:['2020','2021','2022','2023','2024','2025','2026'],data:[101,128,147,137,133,127,134],fmt:v=>fmt0(v)},
+     src:'Source: FRED, IMF Primary Commodity Prices',type:'area',labels:['2020','2021','2022','2023','2024','2025','2026'],data:[101,128,147,137,133,127,134],fmt:v=>fmt0(v)},
     {badge:'Rates',period:'2025',color:p.royal,stat:'4.25%',statLbl:'US Fed policy rate, still high versus peers',
      head:'Advanced-economy interest rates stay high but diverge',
      take:'The US Federal Reserve still holds rates far above the euro area and Japan; elevated and divergent global rates keep the US dollar firm and tighten financial conditions across emerging markets.',
@@ -4145,7 +4140,7 @@ function cotdSet(){
     {badge:'Rainfall',period:'avg 2000 to 2026',color:p.royal,stat:'1,767mm',statLbl:'average annual rainfall, national mean',
      head:'Rainfall follows a sharp monsoon cycle',
      take:'Rain is concentrated in the May to October monsoon and peaks around September, while November to April stays dry, a seasonal rhythm that shapes the planting and harvest calendar.',
-     src:'Source: CHIRPS satellite rainfall (Climate Hazards Group)',type:'col',allLabels:true,labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],data:[16,18,58,109,204,201,243,250,310,243,90,25],fmt:v=>fmt0(v)},
+     src:'Source: CHIRPS satellite rainfall (Climate Hazards Group)',type:'polar',labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],data:[16,18,58,109,204,201,243,250,310,243,90,25],fmt:v=>fmt0(v)},
     {badge:'Vegetation',period:'May 2026',color:p.emerald,stat:'0.59',statLbl:'national vegetation index (NDVI), 0 to 1 scale',
      head:'Forested provinces show the healthiest vegetation',
      take:'The vegetation health index (NDVI) runs highest in the forested and coastal provinces such as Koh Kong, Mondulkiri and Ratanakiri, and lowest across the intensively farmed lowland plain.',
@@ -4154,6 +4149,18 @@ function cotdSet(){
      head:'Nitrogen dioxide is highest in Svay Rieng and the border provinces',
      take:'Over the past year, satellite nitrogen dioxide has been highest in Svay Rieng on the Vietnam border and across the northwest (Banteay Meanchey, Oddar Meanchey), reflecting traffic, industry and dry-season crop-residue burning; Phnom Penh is elevated but not the highest.',
      src:'Source: ESA Sentinel-5P satellite (tropospheric NO2)',type:'hbar',labels:['Svay Rieng','Banteay Meanchey','Oddar Meanchey','Prey Veng','Siem Reap','Ratanakiri','Kandal','Phnom Penh'],data:[1.72,1.26,1.22,1.14,1.13,1.05,1.04,1.03],fmt:v=>fmt(v,2)},
+    {badge:'Income',period:'2015 to 2025',color:p.emerald,stat:'$'+fmt0(pcV.length?pcV[pcV.length-1]:2872),statLbl:'GDP per capita in 2025 (current US$)',
+     head:'Income per person has nearly doubled since 2015',
+     take:'GDP per capita has climbed from about $1,550 in 2015 to roughly $2,870 in 2025, keeping Cambodia firmly in lower-middle-income territory despite the pandemic dip in 2020.',
+     src:'Source: World Bank, World Development Indicators',type:'area',labels:pcY,data:pcV,fmt:v=>'$'+fmt0(v)},
+    {badge:'Labour',period:'2025',color:p.amber,stat:fmt0(infm)+'%',statLbl:'of employment is informal (2025 Labour Force Survey)',
+     head:'Most jobs in Cambodia are informal',
+     take:'About three in four workers are in informal employment, outside formal contracts and social protection, a structural feature of a young, fast-urbanising labour market.',
+     src:'Source: NIS, Cambodia Labour Force Survey 2025',type:'donut',labels:['Informal','Formal'],data:[+infm.toFixed(1),+(100-infm).toFixed(1)],fmt:v=>fmt(v,1)+'%'},
+    {badge:'Tourism',period:'2019 to 2025',color:p.royal,stat:(agV.length?fmt0(agV[agV.length-1]):'955')+'k',statLbl:'foreign visitors to Angkor in 2025 (thousand tickets)',
+     head:'Angkor tourism is recovering but below its 2019 peak',
+     take:'Ticketed foreign visits to the Angkor park collapsed in 2020 and 2021 and have since rebounded strongly, yet 2025 stayed well under half the 2.2 million recorded in 2019.',
+     src:'Source: Angkor Enterprise',type:'area',labels:agY,data:agV,fmt:v=>fmt0(v)+'k'},
   ].filter(c=>c.data&&c.data.length);
 }
 
@@ -4198,9 +4205,34 @@ function pageCOTD(){
   });
 }
 function cotdDraw(id,c){
-  const p=P(), horiz=c.type==='hbar';
+  const p=P();
+  if(c.type==='donut'){
+    const n=c.data.length;
+    const cols=c.data.map((v,i)=> hexA(c.color, .95-(i*(0.62/Math.max(1,n-1)))) );
+    mk(id,{type:'doughnut',data:{labels:c.labels,datasets:[{data:c.data,backgroundColor:cols,borderColor:P().card,borderWidth:2,hoverOffset:5}]},
+      options:Object.assign(baseOpts(),{cutout:'60%',plugins:{legend:{position:'right',labels:{color:P().text2,boxWidth:10,usePointStyle:true,padding:6,font:{size:9.5}}},tooltip:{callbacks:{label:x=>x.label+': '+c.fmt(x.raw)}}}})});
+    return;
+  }
+  if(c.type==='polar'){
+    const mxv=Math.max.apply(null,c.data.map(v=>v||0))||1;
+    const cols=c.data.map(v=> hexA(c.color, .28+.55*((v||0)/mxv)) );
+    mk(id,{type:'polarArea',data:{labels:c.labels,datasets:[{data:c.data,backgroundColor:cols,borderColor:P().card,borderWidth:1.5}]},
+      options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>x.label+': '+c.fmt(x.raw)}}},scales:{r:{grid:{color:p.line},angleLines:{color:p.line},ticks:{display:false,backdropColor:'transparent'},pointLabels:{color:p.text2,font:{size:9}}}}})});
+    return;
+  }
+  if(c.type==='area'||c.type==='line'){
+    const last=c.data.length-1;
+    const lbl={id:'igl_'+id,afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.font='800 10.5px Inter,sans-serif';g.fillStyle=c.color;
+      m.data.forEach((el,i)=>{ if(i!==0&&i!==last) return; if(c.data[i]==null) return; const t=c.fmt(c.data[i]); g.textAlign=(i===0)?'left':'right'; g.textBaseline='bottom'; g.fillText(t,(i===0)?el.x+1:el.x-1,el.y-6);}); g.restore();}};
+    mk(id,{type:'line',plugins:[lbl],data:{labels:c.labels,datasets:[{data:c.data,borderColor:c.color,backgroundColor:c.type==='area'?grad(id,c.color,.28):'transparent',fill:c.type==='area',borderWidth:2.4,pointRadius:0,tension:.32}]},
+      options:Object.assign(baseOpts(),{layout:{padding:{top:18}},plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>c.fmt(x.raw)}}},scales:{x:{grid:{display:false},border:{display:false},ticks:{color:p.text2,font:{size:9.5},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:{color:p.line},border:{display:false},ticks:{display:false}}}})});
+    return;
+  }
+  const horiz=c.type==='hbar';
   let emph=0, mx=-Infinity; c.data.forEach((v,i)=>{ if(v>mx){mx=v;emph=i;} });
   const cols=c.data.map((v,i)=> i===emph ? c.color : hexA(c.color,.34));
+  if(c.pending){for(let i=0;i<cols.length;i++)cols[i]=hexA('#9AA6B2',.16);}
+  const pend=c.pending?[{id:'pnd_'+id,afterDraw(ch){const g=ch.ctx,a=ch.chartArea;g.save();g.textAlign='center';g.fillStyle=P().text2;g.font='800 12.5px Inter,sans-serif';g.fillText('Awaiting live data',(a.left+a.right)/2,(a.top+a.bottom)/2-2);g.font='600 10px Inter,sans-serif';g.fillText('populates after the Google Trends fetch',(a.left+a.right)/2,(a.top+a.bottom)/2+15);g.restore();}}]:[];
   const many=(!horiz && c.data.length>8 && !c.allLabels);
   const lbl={id:'igl_'+id,afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);
     g.save();g.font='800 10.5px Inter,sans-serif';
@@ -4209,7 +4241,7 @@ function cotdDraw(id,c){
       else{g.textAlign='center';g.textBaseline='bottom';g.fillText(t,el.x,el.y-5);}});
     g.restore();}};
   const vgrid={display:true,color:p.line,drawTicks:false,lineWidth:1};
-  mk(id,{type:'bar',plugins:[lbl],data:{labels:c.labels,datasets:[{data:c.data,
+  mk(id,{type:'bar',plugins:[lbl].concat(pend),data:{labels:c.labels,datasets:[{data:c.data,
       backgroundColor:cols,borderRadius:1,barPercentage:.82,categoryPercentage:.86,maxBarThickness:horiz?16:34}]},
     options:Object.assign(baseOpts(),{indexAxis:horiz?'y':'x',layout:{padding:horiz?{right:48}:{top:20}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>c.fmt(x.raw)}}},
