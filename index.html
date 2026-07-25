@@ -4047,10 +4047,10 @@ function cotdSet(){
   const AN=D.angkor; let agY=[],agV=[];
   if(AN&&AN.dates&&AN.values){ const by={}; AN.dates.forEach((d,i)=>{const v=AN.values[i]; if(v!=null){const y=String(d).slice(0,4); by[y]=(by[y]||0)+v;}}); ['2019','2020','2021','2022','2023','2024','2025'].forEach(y=>{ if(by[y]!=null){agY.push(y);agV.push(Math.round(by[y]/1000));} }); }
   return [
-    {badge:'Trade Policy',period:'Jul 2026',color:p.red,stat:'10%',statLbl:'US Section 301 forced-labour duty on Cambodia (lowest tier)',
-     head:'Cambodia gets the lowest US forced-labour tariff tier',
-     take:'On 23 July 2026 the USTR imposed Section 301 forced-labour duties on 60 economies. Cambodia was placed in the 10% tier, below the 12.5% applied to most other investigated economies, for maintaining a forced-labour import prohibition; certain products are exempted.',
-     src:'Source: USTR, Section 301 forced-labour action (23 Jul 2026)',type:'hbar',labels:['Cambodia','Most other economies'],data:[10,12.5],fmt:v=>fmt(v,(v%1===0)?0:1)+'%'},
+    {badge:'Trade Policy',period:'Jul 2026',color:p.red,emph:0,stat:'10%',statLbl:'US Section 301 forced-labour duty on Cambodia vs regional garment rivals',
+     head:'Cambodia matches Bangladesh on the lowest US forced-labour tariff',
+     take:'On 23 July 2026 the USTR imposed Section 301 forced-labour duties on 60 economies. Cambodia and Bangladesh sit in the 10% tier for maintaining forced-labour import bans, while Vietnam and Thailand face 12.5%; certain products are exempted.',
+     src:'Source: USTR, Section 301 forced-labour action (23 Jul 2026)',type:'hbar',labels:['Cambodia','Bangladesh','Vietnam','Thailand'],data:[10,10,12.5,12.5],fmt:v=>fmt(v,(v%1===0)?0:1)+'%'},
     {badge:'Real',period:'2019 to 2026',color:p.royal,stat:'4%',statLbl:'real GDP growth projected for 2026',
      head:'Growth is easing to about 4 percent',
      take:'After the pandemic contraction of 2020, the economy has settled into steady expansion of roughly 5 to 6 percent a year; the National Bank of Cambodia projects growth easing to about 4 percent in 2026.',
@@ -4239,7 +4239,7 @@ function cotdDraw(id,c){
     return;
   }
   const horiz=c.type==='hbar';
-  let emph=0, mx=-Infinity; c.data.forEach((v,i)=>{ if(v>mx){mx=v;emph=i;} });
+  let emph=0, mx=-Infinity; c.data.forEach((v,i)=>{ if(v>mx){mx=v;emph=i;} }); if(typeof c.emph==='number') emph=c.emph;
   const cols=c.data.map((v,i)=> i===emph ? c.color : hexA(c.color,.34));
   if(c.pending){for(let i=0;i<cols.length;i++)cols[i]=hexA('#9AA6B2',.16);}
   const pend=c.pending?[{id:'pnd_'+id,afterDraw(ch){const g=ch.ctx,a=ch.chartArea;g.save();g.textAlign='center';g.fillStyle=P().text2;g.font='800 12.5px Inter,sans-serif';g.fillText('Awaiting live data',(a.left+a.right)/2,(a.top+a.bottom)/2-2);g.font='600 10px Inter,sans-serif';g.fillText('populates after the Google Trends fetch',(a.left+a.right)/2,(a.top+a.bottom)/2+15);g.restore();}}]:[];
