@@ -539,6 +539,12 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
           <div class="rm-desc">A 12-day Israel–Iran air war in <b>June 2025</b> was followed by a sharper escalation in early 2026, when US–Israel strikes led Iran to <b>blockade the Strait of Hormuz</b> — the route for about a quarter of the world's seaborne oil. Brent crude jumped roughly <b>10–13% to ~US$80–82/barrel</b>. As a net fuel importer, Cambodia faces renewed imported-fuel inflation and higher transport and shipping costs.</div></div>
         </div>
 
+        <div class="rm-row">
+          <div class="rm-date">2026<small>JUL</small></div><div class="rm-node"></div>
+          <div class="rm-card"><div class="rm-head"><span class="rm-tag" style="background:var(--royal)">Trade policy</span><span class="rm-title">US Section 301 Forced-Labor Tariffs</span><span class="rm-imp imp-mix">◆ Mixed</span></div>
+          <div class="rm-desc">On <b>23 Jul 2026</b> the USTR imposed Section 301 duties on <b>60 economies</b> for failing to enforce bans on goods made with forced labour. Cambodia was placed in the <b>lowest tier at a 10% rate</b> (versus 12.5% for most other investigated economies), reflecting its forced-labour import prohibition, with certain products exempted — an added but comparatively light duty on garment and footwear exports.</div></div>
+        </div>
+
         <div class="rm-row fwd">
           <div class="rm-date">~2029<small>AHEAD</small></div><div class="rm-node"></div>
           <div class="rm-card"><div class="rm-head"><span class="rm-tag" style="background:#64748B">Structural</span><span class="rm-title">LDC Graduation (scheduled)</span><span class="rm-imp imp-fwd">◇ Forward risk</span></div>
@@ -4041,6 +4047,10 @@ function cotdSet(){
   const AN=D.angkor; let agY=[],agV=[];
   if(AN&&AN.dates&&AN.values){ const by={}; AN.dates.forEach((d,i)=>{const v=AN.values[i]; if(v!=null){const y=String(d).slice(0,4); by[y]=(by[y]||0)+v;}}); ['2019','2020','2021','2022','2023','2024','2025'].forEach(y=>{ if(by[y]!=null){agY.push(y);agV.push(Math.round(by[y]/1000));} }); }
   return [
+    {badge:'Trade Policy',period:'Jul 2026',color:p.red,stat:'10%',statLbl:'US Section 301 forced-labour duty on Cambodia (lowest tier)',
+     head:'Cambodia gets the lowest US forced-labour tariff tier',
+     take:'On 23 July 2026 the USTR imposed Section 301 forced-labour duties on 60 economies. Cambodia was placed in the 10% tier, below the 12.5% applied to most other investigated economies, for maintaining a forced-labour import prohibition; certain products are exempted.',
+     src:'Source: USTR, Section 301 forced-labour action (23 Jul 2026)',type:'hbar',labels:['Cambodia','Most other economies'],data:[10,12.5],fmt:v=>fmt(v,(v%1===0)?0:1)+'%'},
     {badge:'Real',period:'2019 to 2026',color:p.royal,stat:'4%',statLbl:'real GDP growth projected for 2026',
      head:'Growth is easing to about 4 percent',
      take:'After the pandemic contraction of 2020, the economy has settled into steady expansion of roughly 5 to 6 percent a year; the National Bank of Cambodia projects growth easing to about 4 percent in 2026.',
