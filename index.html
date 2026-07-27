@@ -478,7 +478,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
         <div style="width:32%;position:relative"><canvas id="g_credit"></canvas><div style="text-align:center;font-size:10px;color:var(--text2);margin-top:4px">Credit growth</div></div>
       </div><div class="src">Source: National Bank of Cambodia</div></div>
     <div class="card c7"><h3>Macroeconomic Heatmap</h3><div class="cs">Year-on-year change of key indicators, last 12 months · click a row to view its chart</div><div style="overflow-x:auto"><table class="heat" id="ov_heat"></table></div><div class="src">Source: National Bank of Cambodia; green = improvement, red = deterioration</div></div>
-    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 Forecast</h3><div class="cs">Cambodia 2026 real GDP growth (%) — waterfall, highest to lowest (each step = markdown from the previous source)</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC (interpolated); ADB Asian Development Outlook (Jul 2026); AMRO (2026); World Bank (Jun 2026); IMF Article IV Mission (Jul 2026)</div></div>
+    <div class="card c5"><h3>Real GDP Growth Outlook — 2026 &amp; 2027 Forecast</h3><div class="cs">Cambodia real GDP growth (%), 2026 and 2027, by forecasting institution</div><div class="ch"><canvas id="c_fc"></canvas></div><div class="src">Source: NBC, IMF, World Bank, ADB, AMRO.</div></div>
 
     <div class="card c12"><h3>Economic Growth Road Map — Major Shocks &amp; Events</h3><div class="cs">Timeline of key global and domestic events shaping Cambodia's growth (2020–present), with their nature and likely impact</div>
       <div class="rm-legend"><b>Impact:</b>
@@ -1300,15 +1300,19 @@ function pageOverview(){
     tr.style.cursor='pointer'; tr.title='View details →'; tr.onclick=()=>goTo(nav[0],nav[1]);
   });
   // 2026 forecast — waterfall, sorted high-to-low (each step = markdown vs the previous source)
-  {const IG=D.inst.gdp, iy=IG.years.indexOf('2026f');
-   const nbc=(D.gdpAnnualI&&D.gdpAnnualI.g.length)?D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]:((IG['NBC / official']||[])[iy]);
-   const src=[['NBC',nbc,p.navy],['ADB',(IG['ADB (Apr 26)']||[])[iy],p.royal],['AMRO',(IG['AMRO (2026)']||[])[iy],p.gold],
-     ['World Bank',(IG['World Bank (Jun 26)']||[])[iy],p.emerald],['IMF',(IG['IMF (Jul 26)']||[])[iy],p.amber]]
+  {const IG=D.inst.gdp, i26=IG.years.indexOf('2026f');
+   const nbc26=(D.gdpAnnualI&&D.gdpAnnualI.g.length)?D.gdpAnnualI.g[D.gdpAnnualI.g.length-1]:((IG['NBC / official']||[])[i26]);
+   const rows=[['NBC',nbc26,5.0,p.navy],
+     ['ADB',(IG['ADB (Apr 26)']||[])[i26],4.7,p.royal],
+     ['AMRO',(IG['AMRO (2026)']||[])[i26],4.9,p.gold],
+     ['World Bank',(IG['World Bank (Jun 26)']||[])[i26],4.9,p.emerald],
+     ['IMF',(IG['IMF (Jul 26)']||[])[i26],4.0,p.amber]]
      .filter(r=>r[1]!=null).sort((a,b)=>b[1]-a[1]);
-   const lab=src.map(r=>r[0]), lv=src.map(r=>r[1]), col=src.map(r=>r[2]);
-   const seg=lv.map((v,i)=>i===0?[0,v]:[Math.min(lv[i-1],v),Math.max(lv[i-1],v)]);
-   mk('c_fc',{type:'bar',data:{labels:lab,datasets:[{data:seg,backgroundColor:col,borderRadius:4,maxBarThickness:64}]},
-     options:Object.assign(baseOpts(),{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>lab[c.dataIndex]+': '+fmt(lv[c.dataIndex],1)+'%'+(c.dataIndex>0?' ('+(lv[c.dataIndex]-lv[c.dataIndex-1]>=0?'+':'')+fmt(lv[c.dataIndex]-lv[c.dataIndex-1],1)+' pp)':'')}}},
+   const lab=rows.map(r=>r[0]);
+   mk('c_fc',{type:'bar',data:{labels:lab,datasets:[
+     {label:'2026',data:rows.map(r=>r[1]),backgroundColor:hexA(p.royal,.85),borderRadius:3,maxBarThickness:26},
+     {label:'2027',data:rows.map(r=>r[2]),backgroundColor:hexA(p.emerald,.85),borderRadius:3,maxBarThickness:26}]},
+     options:Object.assign(baseOpts(),{plugins:{legend:{display:true,position:'top',labels:{color:P().text2,boxWidth:12,usePointStyle:true,padding:8,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw==null?'n/a':fmt(c.raw,1)+'%')}}},
      scales:{x:{grid:{display:false},ticks:{color:p.text2,font:{size:11}}},y:{min:0,grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});}
   // AI commentary
   const infl=lastVal(M.infl), core=lastVal(M.core), tour=lastVal(mma3(M.tour_g)), cg=lastVal(M.psc_g), resm=lastVal(D.Q.res_mo), npl=lastVal(FSIS().npl);
