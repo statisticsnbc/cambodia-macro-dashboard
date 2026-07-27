@@ -916,7 +916,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
       <div class="src">Source: National Bank of Cambodia. <b>Central East</b> = Chraoy Chongvar, Russey Keo, Chbar Ampov, Doun Penh, Tuol Kouk, Prampir Meakkakra, Chamkar Mon, Boeng Keng Kang; <b>Inner Suburb</b> = Saensokh, Mean Chey, Pur SenChey; <b>Outer Suburb</b> = Praek Pnov, Kamboul, Dangkao.</div></div>
     <div class="card c6"><h3>Residential Property Prices (RPPI)</h3><div class="cs">Year-on-Year Growth (%) — Phnom Penh vs. Other Provinces</div><div class="ch"><canvas id="r_rppi"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
     <div class="card c6"><h3>Residential Property Prices (RPPI)</h3><div class="cs">Month-on-Month Change (%) — Phnom Penh vs. Other Provinces</div><div class="ch"><canvas id="r_rppi_mom"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Phnom Penh RPPI by Area — Year-on-Year</h3><div class="cs">Year-on-Year Growth (%) — Phnom Penh, Central East, Inner Suburb, Outer Suburb</div><div class="ch"><canvas id="r_rppi_pp"></canvas></div><div class="src">Source: National Bank of Cambodia. Note: <b>Central East</b> = Chraoy Chongvar, Russey Keo, Chbar Ampov, Doun Penh, Tuol Kouk, Prampir Meakkakra, Chamkar Mon, Boeng Keng Kang; <b>Inner Suburb</b> = Saensokh, Mean Chey, Pur SenChey; <b>Outer Suburb</b> = Praek Pnov, Kamboul, Dangkao.</div></div>
+    <div class="card c6"><h3>Phnom Penh RPPI by Area — Year-on-Year</h3><div class="cs">Year-on-Year Growth (%) — Phnom Penh, Central East, Inner Suburb, Outer Suburb</div><div class="ch"><canvas id="r_rppi_pp"></canvas></div><div class="src">Source: National Bank of Cambodia.</div></div>
     <div class="card c6"><h3>Phnom Penh RPPI by Area — Month-on-Month</h3><div class="cs">Month-on-Month Change (%) — Phnom Penh, Central East, Inner Suburb, Outer Suburb</div><div class="ch"><canvas id="r_rppi_pp_mom"></canvas></div><div class="src">Source: National Bank of Cambodia. Area definitions as in the year-on-year chart.</div></div>
     <div class="card c6"><h3>Property Transactions</h3><div class="cs">Number of Transactions per Month — Total, Phnom Penh and Other Provinces</div><div class="ch"><canvas id="r_rpptx"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
     <div class="card c6"><h3>Share of Property Transactions by Area</h3><div class="cs">% of Total Monthly Transactions — Central East, Inner Suburb, Outer Suburb (Phnom Penh) and Other Provinces</div><div class="ch"><canvas id="r_rpptx_sh"></canvas></div><div class="src">Source: National Bank of Cambodia; NBC staff calculation</div></div>
@@ -982,10 +982,10 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="sec-sub">The external environment shaping Cambodia's economy: commodity prices, advanced-economy policy rates and world growth</div>
   <div class="grid">
     <div class="card c6"><h3>Real GDP Growth, Major Economies</h3><div class="cs">Annual real GDP growth (%)</div><div class="ch"><canvas id="gl_gdp"></canvas></div><div class="src">Source: IMF World Economic Outlook (July 2026 Update); 2026–2027 projected</div></div>
-    <div class="card c6"><h3>Major Central Bank Policy Rates</h3><div class="cs">Key policy rate (%), monthly</div><div class="ch"><canvas id="gl_rates"></canvas></div><div class="src">Source: FRED (Federal Funds Effective Rate, monthly); ECB; Bank of Japan</div></div>
+    <div class="card c6"><h3>Major Central Bank Policy Rates</h3><div class="cs">Key policy rate (%), monthly</div><div class="ch"><canvas id="gl_rates"></canvas></div><div class="src">Source: FRED (Federal Funds Effective Rate); ECB; Bank of Japan</div></div>
     <div class="card c6"><h3>Global Crude Oil Price</h3><div class="cs">Brent crude, monthly (US$ per barrel)</div><div class="ch"><canvas id="gl_oil"></canvas></div><div class="src">Source: FRED / IMF Primary Commodity Prices (POILBREUSDM)</div></div>
     <div class="card c6"><h3>World Food Price Index</h3><div class="cs">IMF Global Food Price Index, monthly (2016 = 100)</div><div class="ch"><canvas id="gl_food"></canvas></div><div class="src">Source: FRED / IMF Primary Commodity Prices (PFOODINDEXM)</div></div>
-    <div class="card c6"><h3>Market Volatility (VIX)</h3><div class="cs">CBOE Volatility Index, annual average</div><div class="ch"><canvas id="gl_vix"></canvas></div><div style="font-size:10.5px;color:var(--text2);margin-top:6px;line-height:1.5"><b>Note:</b> The VIX is Wall Street's "fear gauge" — the expected 30-day volatility of the US stock market. Higher readings signal market stress and risk-off sentiment, which tighten global financial conditions and can slow capital flows to emerging markets such as Cambodia; low readings indicate calm, risk-on conditions.</div><div class="src">Source: CBOE via FRED (VIXCLS)</div></div>
+    <div class="card c6"><h3>Market Volatility (VIX)</h3><div class="cs">CBOE Volatility Index, annual average</div><div class="ch"><canvas id="gl_vix"></canvas></div><div style="font-size:10.5px;color:var(--text2);margin-top:6px;line-height:1.5"><b>Note:</b> The VIX measures expected 30-day U.S. stock market volatility. Higher values indicate greater market uncertainty, while lower values reflect calmer market conditions.</div><div class="src">Source: CBOE via FRED (VIXCLS)</div></div>
     <div class="card c6"><h3>Volume of Imports of Goods, Growth</h3><div class="cs">Annual volume growth (%)</div><div class="ch"><canvas id="gl_imp"></canvas></div><div style="font-size:10.5px;color:var(--text2);margin-top:6px;line-height:1.5"><b>Note:</b> ASEAN-5 = Indonesia, Malaysia, the Philippines, Thailand and Vietnam.</div><div class="src">Source: IMF World Economic Outlook (indicative; 2025-2026 projected)</div></div>
     <div class="card c6"><h3>Volume of Exports of Goods, Growth</h3><div class="cs">Annual volume growth (%)</div><div class="ch"><canvas id="gl_exp"></canvas></div><div style="font-size:10.5px;color:var(--text2);margin-top:6px;line-height:1.5"><b>Note:</b> ASEAN-5 = Indonesia, Malaysia, the Philippines, Thailand and Vietnam.</div><div class="src">Source: IMF World Economic Outlook (indicative; 2025-2026 projected)</div></div>
     <div class="card c6"><h3>Global Inflation, Consumer Prices</h3><div class="cs">Annual average CPI inflation (%)</div><div class="ch"><canvas id="gl_infl"></canvas></div><div class="src">Source: IMF World Economic Outlook (indicative; 2025-2026 projected)</div></div>
@@ -993,7 +993,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="sec-title serif">Country Comparison — ASEAN</div>
   <div class="sec-sub">Cambodia Against Regional Peers — Key Macroeconomic Indicators</div>
   <div class="grid">
-    <div class="card c6"><h3>Balance of Payments — Key Indicators</h3><div class="cs">Quarterly, US$ billion — Cambodia Highlighted. Singapore is excluded: its flows are several times larger than other ASEAN members' and would compress the scale for the rest of the region. Indicator:
+    <div class="card c6"><h3>Balance of Payments — Key Indicators</h3><div class="cs">Quarterly, US$ billion. Indicator:
       <select id="bop_metric" style="background:var(--card);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:12px;font-weight:600;border-radius:8px;padding:4px 8px;cursor:pointer">
         <option value="cab">Current Account Balance</option>
         <option value="overall">Overall Balance</option>
@@ -1002,18 +1002,18 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
         <option value="travel">Travel Receipts</option>
         <option value="transfers">Personal Transfer Receipts</option>
         <option value="fdi">FDI Inflows</option>
-      </select></div><div class="ch tall"><canvas id="c_bop"></canvas></div><div class="src" id="c_bop_src">Source: IMF</div></div>
-    <div class="card c6"><h3>Monetary Statistics — Key Indicators</h3><div class="cs">Monthly, YoY % Growth of National-Currency Levels (ODC Survey) — Cambodia Highlighted. Indicator:
+      </select></div><div class="ch tall"><canvas id="c_bop"></canvas></div><div class="src" id="c_bop_src">Source: International Monetary Fund</div></div>
+    <div class="card c6"><h3>Monetary Statistics — Key Indicators</h3><div class="cs">Monthly, YoY % Growth of National-Currency Levels (ODC Survey). Indicator:
       <select id="mfs_metric" style="background:var(--card);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:12px;font-weight:600;border-radius:8px;padding:4px 8px;cursor:pointer">
         <option value="credit">Credit to Private Sector</option>
         <option value="deposits">Deposits (Broad Money)</option>
         <option value="nfa">Net Foreign Assets</option>
         <option value="assets">Total Assets</option>
         <option value="foreign">Claims on Nonresidents</option>
-      </select></div><div class="ch tall"><canvas id="c_mfs"></canvas></div><div class="src" id="c_mfs_src">Source: IMF</div></div>
-    <div class="card c6"><h3>Inflation (CPI, Monthly YoY)</h3><div class="cs">Year-over-year % change of the monthly CPI (standard reference period: 2010 = 100) — Cambodia Highlighted</div><div class="ch"><canvas id="c_infl"></canvas></div><div class="src" id="c_infl_src">Source: IMF</div></div>
-    <div class="card c6"><h3>Real GDP Growth</h3><div class="cs">Annual % — Cambodia Highlighted; dashed = IMF projections (WEO Jul 2026 Update; Cambodia = IMF Article IV Jul 2026)</div><div class="ch"><canvas id="c_gdp"></canvas></div><div class="src" id="c_gdp_src">Source: IMF</div></div>
-    <div class="card c12"><h3>IMF WEO Scorecard — ASEAN</h3><div class="cs">Nineteen World Economic Outlook indicators across the ten ASEAN economies, latest actual year — Cambodia highlighted</div><div style="overflow-x:auto"><table class="tbl" id="c_weo"></table></div><div class="src" id="c_weo_src"></div></div>
+      </select></div><div class="ch tall"><canvas id="c_mfs"></canvas></div><div class="src" id="c_mfs_src">Source: International Monetary Fund</div></div>
+    <div class="card c6"><h3>Inflation (CPI, Monthly YoY)</h3><div class="cs">Year-over-year % change of the monthly CPI (standard reference period: 2010 = 100)</div><div class="ch"><canvas id="c_infl"></canvas></div><div class="src" id="c_infl_src">Source: International Monetary Fund</div></div>
+    <div class="card c6"><h3>Real GDP Growth</h3><div class="cs">Annual %; dashed = IMF projections (WEO Jul 2026 Update; Cambodia = IMF Article IV, Jul 2026)</div><div class="ch"><canvas id="c_gdp"></canvas></div><div class="src" id="c_gdp_src">Source: International Monetary Fund</div></div>
+    <div class="card c12"><h3>IMF WEO Scorecard — ASEAN</h3><div class="cs">Nineteen World Economic Outlook indicators across the ten ASEAN economies, latest actual year</div><div style="overflow-x:auto"><table class="tbl" id="c_weo"></table></div><div class="src" id="c_weo_src"></div></div>
   </div>
 </div></div>
 
@@ -3677,23 +3677,24 @@ function pageCompare(){
     const axP=(cb)=>({x:{grid:{display:false},ticks:{color:p.text2}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:cb}}});
     const axPM=(cb)=>({x:{grid:{display:false},ticks:{color:p.text2,autoSkip:false,maxRotation:0,callback:function(v){const l=this.getLabelForValue(v);return (l&&l.slice(0,3)==='Jan')?l.slice(-4):'';}}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:cb}}});
     const leg=(on)=>({legend:{display:on,position:'top',labels:{boxWidth:12,font:{size:10},color:p.text2}}});
-    mk('gl_oil',{type:'line',data:{labels:ML,datasets:[{label:'Brent $/bbl',data:oilM,borderColor:p.navy,backgroundColor:grad('gl_oil',p.navy,.15),fill:true,borderWidth:2,pointRadius:0,tension:.25}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axPM(v=>'$'+v)})});
-    mk('gl_food',{type:'line',data:{labels:ML,datasets:[{label:'Food index',data:foodM,borderColor:p.emerald,backgroundColor:grad('gl_food',p.emerald,.15),fill:true,borderWidth:2,pointRadius:0,tension:.25}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axPM(v=>v)})});
-    mk('gl_vix',{type:'line',data:{labels:gy,datasets:[{label:'VIX',data:vix,borderColor:p.red,backgroundColor:grad('gl_vix',p.red,.15),fill:true,borderWidth:2.2,pointRadius:0,tension:.3}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axP(v=>v)})});
-    mk('gl_rates',{type:'line',data:{labels:ML,datasets:[{label:'US Fed',data:fed,borderColor:p.royal,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2},{label:'ECB',data:ecb,borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2},{label:'Bank of Japan',data:boj,borderColor:p.red,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axPM(v=>v+'%')})});
-    mk('gl_gdp',{type:'line',data:{labels:gyG,datasets:[{label:'United States',data:usa,borderColor:p.royal,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'Euro area',data:eur,borderColor:p.navy,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'China',data:chn,borderColor:p.red,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'World',data:wld,borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.6,pointRadius:0,tension:.3,borderDash:[5,3]}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
-    const tyr=['2018','2019','2020','2021','2022','2023','2024','2025','2026F'];
+    const _yrN=RANGE===0?9999:Math.max(2,Math.round(RANGE/12)); const _moN=RANGE===0?9999:RANGE; const tkA=a=>a.slice(Math.max(0,a.length-_yrN)); const tkM=a=>a.slice(Math.max(0,a.length-_moN));
+    mk('gl_oil',{type:'line',data:{labels:tkM(ML),datasets:[{label:'Brent $/bbl',data:tkM(oilM),borderColor:p.navy,backgroundColor:grad('gl_oil',p.navy,.15),fill:true,borderWidth:2,pointRadius:0,tension:.25}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axPM(v=>'$'+v)})});
+    mk('gl_food',{type:'line',data:{labels:tkM(ML),datasets:[{label:'Food index',data:tkM(foodM),borderColor:p.emerald,backgroundColor:grad('gl_food',p.emerald,.15),fill:true,borderWidth:2,pointRadius:0,tension:.25}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axPM(v=>v)})});
+    mk('gl_vix',{type:'line',data:{labels:tkA(gy),datasets:[{label:'VIX',data:tkA(vix),borderColor:p.red,backgroundColor:grad('gl_vix',p.red,.15),fill:true,borderWidth:2.2,pointRadius:0,tension:.3}]},options:Object.assign(baseOpts(),{plugins:leg(false),scales:axP(v=>v)})});
+    mk('gl_rates',{type:'line',data:{labels:tkM(ML),datasets:[{label:'US Fed',data:tkM(fed),borderColor:p.royal,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2},{label:'ECB',data:tkM(ecb),borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2},{label:'BOJ',data:tkM(boj),borderColor:p.red,backgroundColor:'transparent',borderWidth:2.4,pointRadius:0,tension:.2}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axPM(v=>v+'%')})});
+    mk('gl_gdp',{type:'line',data:{labels:tkA(gyG),datasets:[{label:'United States',data:tkA(usa),borderColor:p.royal,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'Euro area',data:tkA(eur),borderColor:p.navy,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'China',data:tkA(chn),borderColor:p.red,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'World',data:tkA(wld),borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.6,pointRadius:0,tension:.3,borderDash:[5,3]}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
+    const tyr=['2018','2019','2020','2021','2022','2023','2024','2025','2026'];
     const imW=[4.6,1.0,-8.2,11.6,5.5,1.2,3.4,3.2,3.5], imA=[3.3,2.0,-8.9,10.1,6.7,-0.8,2.4,2.1,2.6], imEA=[7.9,0.5,-3.8,12.0,2.5,4.5,5.5,4.8,4.5], imS=[8.0,1.5,-8.5,13.0,8.0,2.0,5.0,4.5,4.5];
     const exW=[4.0,1.0,-8.2,11.0,5.6,0.6,3.6,3.0,3.5], exA=[3.6,1.8,-9.2,9.5,5.9,1.6,2.3,2.5,2.7], exEA=[4.5,0.6,-4.0,14.0,3.0,1.5,5.0,4.5,4.5], exS=[5.0,1.0,-8.0,12.0,6.5,2.5,5.5,4.5,4.5];
     const tds=(w,a,ea,s)=>[{label:'World',data:w,borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.6,pointRadius:0,tension:.3,borderDash:[5,3]},{label:'Advanced economies',data:a,borderColor:p.navy,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'Emerging & Developing Asia',data:ea,borderColor:p.red,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'ASEAN-5',data:s,borderColor:p.royal,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3}];
-    mk('gl_imp',{type:'line',data:{labels:tyr,datasets:tds(imW,imA,imEA,imS)},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
-    mk('gl_exp',{type:'line',data:{labels:tyr,datasets:tds(exW,exA,exEA,exS)},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
+    mk('gl_imp',{type:'line',data:{labels:tkA(tyr),datasets:tds(tkA(imW),tkA(imA),tkA(imEA),tkA(imS))},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
+    mk('gl_exp',{type:'line',data:{labels:tkA(tyr),datasets:tds(tkA(exW),tkA(exA),tkA(exEA),tkA(exS))},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
     const inW=[3.6,3.5,3.2,4.7,8.7,6.8,5.7,4.3,3.7], inA=[2.0,1.4,0.7,3.1,7.3,4.6,2.6,2.5,2.1], inE=[4.9,5.1,5.2,5.9,9.8,8.3,7.9,5.6,4.7];
-    mk('gl_infl',{type:'line',data:{labels:tyr,datasets:[{label:'World',data:inW,borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.6,pointRadius:0,tension:.3,borderDash:[5,3]},{label:'Advanced economies',data:inA,borderColor:p.navy,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'Emerging market & developing economies',data:inE,borderColor:p.red,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
+    mk('gl_infl',{type:'line',data:{labels:tkA(tyr),datasets:[{label:'World',data:tkA(inW),borderColor:p.gold,backgroundColor:'transparent',borderWidth:2.6,pointRadius:0,tension:.3,borderDash:[5,3]},{label:'Advanced economies',data:tkA(inA),borderColor:p.navy,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3},{label:'Emerging market & developing economies',data:tkA(inE),borderColor:p.red,backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:.3}]},options:Object.assign(baseOpts(),{plugins:leg(true),scales:axP(v=>v+'%')})});
     { const oilLast=oilM[oilM.length-1], foodLast=foodM[foodM.length-1], gEl=document.getElementById('c_gai');
       if(gEl) gEl.innerHTML=`<div class="ai-t">✦ Global Assessment</div>`
         +`<p><b>Commodities.</b> Brent crude spiked toward $100 a barrel in spring 2026 before easing to about $${oilLast.toFixed(0)} a barrel, while the world food price index (${foodLast.toFixed(0)}, 2016 = 100) has come off its 2022 record but stays well above pre-pandemic levels, keeping Cambodia’s imported-inflation risk alive.</p>`
-        +`<p><b>Financial conditions.</b> Advanced-economy policy rates remain restrictive and divergent (US Fed ${fed[fed.length-1].toFixed(2)}%, ECB ${ecb[ecb.length-1].toFixed(2)}%, Bank of Japan ${boj[boj.length-1].toFixed(2)}%), sustaining a firm US dollar and elevated external financing costs for a highly dollarized economy.</p>`
+        +`<p><b>Financial conditions.</b> Advanced-economy policy rates remain restrictive and divergent (US Fed ${fed[fed.length-1].toFixed(2)}%, ECB ${ecb[ecb.length-1].toFixed(2)}%, BOJ ${boj[boj.length-1].toFixed(2)}%), sustaining a firm US dollar and elevated external financing costs for a highly dollarized economy.</p>`
         +`<p><b>Growth and trade.</b> World output is projected near ${wld[gyG.indexOf('2026')].toFixed(1)}% in 2026 (and ${wld[gyG.indexOf('2027')].toFixed(1)}% in 2027) with China around ${chn[gyG.indexOf('2026')].toFixed(1)}%; steady but unspectacular external demand, alongside a gradual recovery in world trade volumes, frames the outlook for Cambodia’s exports and tourism.</p>`; }
   }
   const names=(C&&C.countries)||{KHM:'Cambodia',VNM:'Vietnam',THA:'Thailand',IDN:'Indonesia',MYS:'Malaysia',PHL:'Philippines',SGP:'Singapore',LAO:'Lao PDR',BRN:'Brunei',MMR:'Myanmar'};
@@ -3738,7 +3739,7 @@ function pageCompare(){
        }
      }
      const tw=document.getElementById('c_weo');if(tw)tw.innerHTML=h;}
-    const srcTxt='Source: IMF';
+    const srcTxt='Source: International Monetary Fund';
     ['c_gdp_src','c_weo_src'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=srcTxt;});
   } else if(C){
     const yl=C.years.map(String);
@@ -3761,7 +3762,7 @@ function pageCompare(){
       tension:.3,spanGaps:true,order:c==='KHM'?0:1}));
     mk('c_infl',{type:'line',data:{labels:yl3.map(monLab),datasets:cinf},options:pctLineOpts()});
     const se=document.getElementById('c_infl_src');
-    if(se)se.textContent='Source: IMF';
+    if(se)se.textContent='Source: International Monetary Fund';
   } else hideCard('c_infl');
   // ---- ASEAN Balance of Payments — key indicators (IMF/BOP/IMF_BOP_*.json), metric-selectable ----
   if(D.bopCmp){
@@ -3781,7 +3782,7 @@ function pageCompare(){
         options:Object.assign(baseOpts(),{plugins:{legend:{position:'right',labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:8,font:{size:10}}},tooltip:{callbacks:{label:c2=>c2.dataset.label.replace(/ \S+$/,'')+': $'+fmt(c2.raw,2)+' bn'}}},
         scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>'$'+v+'bn'}}}})});
       const sb=document.getElementById('c_bop_src');
-      if(sb)sb.textContent='Source: IMF';
+      if(sb)sb.textContent='Source: International Monetary Fund';
     };
     if(selB&&!selB.dataset.ready){selB.dataset.ready='1';selB.addEventListener('change',drawBOP);}
     drawBOP();
@@ -3798,7 +3799,7 @@ function pageCompare(){
         tension:.3,spanGaps:true,order:c==='KHM'?0:1}));
       mk('c_mfs',{type:'line',data:{labels:ylm,datasets:dsm},options:pctLineOpts()});
       const sm=document.getElementById('c_mfs_src');
-      if(sm)sm.textContent='Source: IMF';
+      if(sm)sm.textContent='Source: International Monetary Fund';
     };
     if(selM&&!selM.dataset.ready){selM.dataset.ready='1';selM.addEventListener('change',drawMFS);}
     drawMFS();
