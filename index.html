@@ -438,7 +438,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
 <div class="nav"><div class="wrap">
   <div class="tabs" id="tabs">
     <div class="tab active" data-p="overview"><span class="ico">◈</span>Overview</div>
-    <div class="tab" data-p="risk"><span class="ico">▲</span>Risk Monitor</div>
+    
     <div class="tab" data-p="cotd"><span class="ico">◫</span>Infographic</div>
     <div class="tab" data-p="real"><span class="ico">⚙</span>Real Sector</div>
     <div class="tab" data-p="external"><span class="ico">⇄</span>External</div>
@@ -1022,16 +1022,6 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
 </div></div>
 
 <!-- ================= RISK ================= -->
-<div class="page" id="p-risk"><div class="wrap">
-  <div class="sec-title serif">Economic Risk Monitor</div>
-  <div class="sec-sub">Traffic-light assessment computed from latest data against policy-relevant thresholds</div>
-  <div class="grid">
-    <div class="card c7"><h3>Risk Dashboard</h3><div class="cs" id="risk_legend">🟢 Stable · 🟡 Watch · 🔴 High risk</div><table class="tbl" id="risk_grid"></table><div class="src">Rule-based assessment computed from NBC · MEF · NIS · IMF · WB · ADB assessments; thresholds shown per row</div></div>
-    <div class="card c5"><h3>Risk Radar</h3><div class="cs">0 = low risk, 100 = high risk</div><div class="ch"><canvas id="risk_radar"></canvas></div><div class="src" style="margin-top:8px;font-size:10.5px;line-height:1.5;opacity:1"><b>Method:</b> each risk is rated Low, Moderate (Watch) or High from rule-based thresholds on the latest data, scored 15 / 55 / 90 and plotted here (e.g. inflation &gt;4% Watch, &gt;6% High; reserves &lt;3 months High). Aligned with NBC, IMF and World Bank conventions; indicative, not official ratings.</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);border-top:1px solid var(--line);margin:26px 0 4px;padding-top:16px">Risk matrix · likelihood × impact (indicative)</div><div class="ch" style="height:300px"><canvas id="risk_quad"></canvas></div><div class="src" style="margin-top:10px;font-size:10.5px;line-height:1.5;opacity:1"><b>Method:</b> each risk is placed by likelihood (near-term probability) and impact (severity if it materialises) on a 1–5 scale; colour marks its current traffic-light status. Points in the upper-right zone warrant the closest management. Likelihood and impact are indicative expert judgement.</div></div>
-    <div class="card c12"><h3>Vulnerability Heatmap</h3><div class="cs">Key indicators by quarter — colour: green favourable → red unfavourable (per-row scaling)</div><div style="overflow-x:auto"><table class="heat" id="risk_heat"></table></div><div class="src">Source: National Bank of Cambodia</div></div>
-  </div>
-  <div class="ai" id="risk_ai"></div>
-</div></div>
 <div class="page" id="p-others"><div class="wrap">
   <div class="sec-title serif">Others</div>
   <div class="sec-sub">Additional geographic and administrative references</div>
@@ -4388,7 +4378,7 @@ function cotdDraw(id,c){
         :{x:{grid:{display:false},border:{display:false},ticks:{color:p.text2,font:{size:9.5},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:vgrid,border:{display:false},ticks:{display:false}}}})});
 }
 
-const PAGES={overview:pageOverview,real:pageReal,external:pageExternal,monetary:pageMonetary,banking:pageBanking,rppi:pageRPPI,fiscal:pageFiscal,cgo:pageCGO,cross:function(){/* Forecast — empty for now */},compare:pageCompare,risk:pageRisk,others:pageOthers,cotd:pageCOTD};
+const PAGES={overview:pageOverview,real:pageReal,external:pageExternal,monetary:pageMonetary,banking:pageBanking,rppi:pageRPPI,fiscal:pageFiscal,cgo:pageCGO,cross:function(){/* Forecast — empty for now */},compare:pageCompare,others:pageOthers,cotd:pageCOTD};
 const rendered={};
 // ---- Live AI "Ask" box for each insight panel (works when opened as a Cowork artifact) ----
 // minimal, safe Markdown → HTML for the Ask answers (bold, headings, bullet/numbered lists)
