@@ -1171,7 +1171,7 @@ function kpiRow(){
   const M=D.M, i=lastIdx(M.infl), d=D.mdates;
   const yGdpI=D.Y.gdp_g.length-2; // 2025 estimate
   const defs=[
-    {l:'GDP Growth',v:D.Y.gdp_g[yGdpI],suf:'%',prev:D.Y.gdp_g[yGdpI-1],spark:D.Y.gdp_g,goodUp:true,per:'2025e',color:'--royal',note:'NIS'},
+    {l:'GDP Growth',v:3.9,suf:'%',prev:D.Y.gdp_g[yGdpI],spark:D.Y.gdp_g,goodUp:true,per:'2026F',color:'--royal',note:'NBC'},
     {l:'Inflation (CPI)',v:lastVal(M.infl),suf:'%',prev:valAt(M.infl,lastIdx(M.infl)-1),spark:M.infl,goodUp:false,per:monLab(d[lastIdx(M.infl)]),color:'--red'},
     {l:'Core Inflation',v:lastVal(M.core),suf:'%',prev:valAt(M.core,lastIdx(M.core)-1),spark:M.core,goodUp:false,per:monLab(d[lastIdx(M.core)]),color:'--amber'},
     {l:'Exchange Rate',v:lastVal(M.fx),suf:'',prev:valAt(M.fx,lastIdx(M.fx)-1),spark:M.fx,goodUp:false,per:monLab(d[lastIdx(M.fx)]),color:'--navy2',d:0,note:'KHR/USD'},
