@@ -581,6 +581,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
     <div class="card c6"><h3>Industry Sub-sector Growth</h3><div class="cs">Year-on-Year Growth (%), Constant 2014 Prices</div><div class="ch"><canvas id="r_indsub"></canvas></div><div class="src">Source: National Institute of Statistics — GDP by Production Approach</div></div>
     <div class="card c6"><h3>Services Sub-sector Growth</h3><div class="cs">Year-on-Year Growth (%), Constant 2014 Prices</div><div class="ch"><canvas id="r_srvsub"></canvas></div><div class="src">Source: National Institute of Statistics — GDP by Production Approach</div></div>
     <div class="card c6"><h3>Minimum Wage — Garment Sector</h3><div class="cs" id="cs_minwage">Cambodia, monthly minimum wage (US$)</div><div class="ch"><canvas id="r_minwage"></canvas></div><div class="src" id="r_minwage_src">Source: Ministry of Labour and Vocational Training</div></div>
+    <div class="card c6"><h3>Retail Fuel Prices</h3><div class="cs" id="cs_fuel"></div><div class="ch"><canvas id="r_fuel"></canvas></div><div class="src" id="r_fuel_src">Source: Ministry of Commerce</div></div>
     <div class="card c6"><h3>International Tourist Arrivals</h3><div class="cs">Monthly Tourist Arrivals and Annual Growth (%)</div><div class="ch"><canvas id="rs_tour"></canvas></div><div class="src">Source: Ministry of Tourism</div></div>
     <div class="card c6"><h3>Top Tourist Source Markets</h3><div class="cs" id="cs_rs_tourctry">Share of Total Tourist Arrivals (%)</div><div class="ch"><canvas id="rs_tourctry"></canvas></div><div class="src">Source: Ministry of Tourism</div></div>
     <div class="card c6"><h3>Angkor Ticket Sales</h3><div class="cs" id="cs_angkor">Monthly Tickets Sold and Annual Growth (%)</div><div class="ch"><canvas id="r_angkor"></canvas></div>
@@ -1592,6 +1593,74 @@ function sezInit(){
 
 
 
+/* ---------- Retail fuel prices (live from MEF Open Data) ---------- */
+let _fuelDone=false;
+function fuelInit(){
+  const cv=document.getElementById('r_fuel'); if(!cv) return;
+  if(_fuelDone) return; _fuelDone=true;
+  const card=cv.closest('.card');
+  const setSub=t=>{const e=document.getElementById('cs_fuel'); if(e)e.textContent=t;};
+  const base='https://data.mef.gov.kh/api/v1/public-datasets/pd_681d89b4dbc953000126f5e7/json';
+  (async()=>{
+    try{
+      let rows=[];
+      for(let pg=1; pg<=60; pg++){
+        const r=await fetch(base+'?page='+pg+'&page_size=100');
+        if(!r.ok) break;
+        const j=await r.json();
+        const arr=Array.isArray(j)?j:(j.data||j.results||j.records||j.rows||j.items||[]);
+        if(!arr||!arr.length) break;
+        rows=rows.concat(arr);
+        if(arr.length<100) break;
+      }
+      if(!rows.length){ setSub('Live data returned no rows from MEF Open Data'); return; }
+      renderFuel(rows);
+    }catch(e){
+      console.error('fuel fetch',e);
+      setSub('Live data unavailable — could not reach data.mef.gov.kh (check network/CORS)');
+      if(card){ const ch=card.querySelector('.ch'); if(ch) ch.style.opacity=.35; }
+    }
+  })();
+}
+function renderFuel(rows){
+  const p=P();
+  const keys=Object.keys(rows[0]||{});
+  const isDateName=k=>/date|period|month|day|time|year|а|ថ្ងៃ|កាល/i.test(k);
+  let dateKey=keys.find(isDateName) || keys.find(k=>rows.some(r=>!isNaN(Date.parse(r[k]))));
+  const numKeys=keys.filter(k=>k!==dateKey && !isDateName(k) && rows.some(r=>r[k]!=null&&r[k]!==''&&!isNaN(parseFloat(r[k]))));
+  const strKeys=keys.filter(k=>k!==dateKey && rows.every(r=>r[k]==null||r[k]===''||isNaN(parseFloat(r[k]))));
+  const keyOf=v=>{const d=new Date(v); return isNaN(d)?String(v):d.toISOString().slice(0,10);};
+  rows=rows.slice().sort((a,b)=>{const da=Date.parse(a[dateKey]),db=Date.parse(b[dateKey]);return (isNaN(da)?0:da)-(isNaN(db)?0:db);});
+  let series={}, labels=[];
+  const dset=[]; const seen=new Set();
+  rows.forEach(r=>{const k=keyOf(r[dateKey]); if(!seen.has(k)){seen.add(k); dset.push(k);}});
+  labels=dset; const li=Object.fromEntries(labels.map((l,i)=>[l,i]));
+  if(numKeys.length===1 && strKeys.length){
+    const catKey=strKeys.sort((a,b)=>new Set(rows.map(r=>r[b])).size-new Set(rows.map(r=>r[a])).size)[0], valKey=numKeys[0];
+    rows.forEach(r=>{const c=r[catKey]; if(c==null)return; (series[c]=series[c]||labels.map(()=>null))[li[keyOf(r[dateKey])]]=parseFloat(r[valKey]);});
+  } else {
+    numKeys.forEach(k=>series[k]=labels.map(()=>null));
+    rows.forEach(r=>{const i=li[keyOf(r[dateKey])]; numKeys.forEach(k=>{const v=parseFloat(r[k]); if(!isNaN(v)) series[k][i]=v;});});
+  }
+  const nice=l=>{const d=new Date(l); return isNaN(d)?l:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+String(d.getFullYear()).slice(2);};
+  const isYoY=nm=>/y.?o.?y|year.?on.?year|change|growth|percent|%|ការប្រែប្រួល/i.test(nm);
+  const relabel=nm=>/gasoil|diesel|ម៉ាស៊ូត/i.test(nm)?'Diesel':(/gasoline|petrol|benz|regular|ea ?92| សាំង/i.test(nm)?'Regular Gasoline':nm);
+  const cols={'Regular Gasoline':p.royal,'Diesel':p.gold};
+  const extra=[p.emerald,p.red,p.navy,p.amber,'#8e44ad','#16a085']; let ei=0;
+  const ds=Object.keys(series).map(nm=>{
+    const yy=isYoY(nm), lab=relabel(nm)+(yy?' (y/y %)':'');
+    const base=relabel(nm), c=yy?p.emerald:(cols[base]||extra[ei++%extra.length]);
+    return {label:lab,data:series[nm],borderColor:c,backgroundColor:'transparent',borderWidth:yy?1.8:2.2,
+      borderDash:yy?[5,3]:[],pointRadius:0,tension:.25,spanGaps:true,yAxisID:yy?'y2':'y'};
+  });
+  const hasYoY=ds.some(d=>d.yAxisID==='y2');
+  const yscales={x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},
+    y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2}}};
+  if(hasYoY) yscales.y2={position:'right',grid:{display:false},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}};
+  mk('r_fuel',{type:'line',data:{labels:labels.map(nice),datasets:ds},
+    options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:8,font:{size:10}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmt(c.raw,c.dataset.yAxisID==='y2'?1:0)+(c.dataset.yAxisID==='y2'?'%':'')}}},
+    scales:yscales})});
+}
 function pageReal(){
   try{minWageInit();}catch(e){console.error('minWageInit',e);}
   try{sezInit();}catch(e){console.error('sezInit',e);}
@@ -1602,6 +1671,7 @@ function pageReal(){
   ltmInit();
   envInit();
   try{rsTourismInit();}catch(e){console.error('rsTourismInit',e);}
+  try{fuelInit();}catch(e){console.error('fuelInit',e);}
   const p=P(),G=D.gdpSector;
   // labour market cards (CLFS 2025)
   if(D.labour){const L=D.labour;
