@@ -3759,7 +3759,7 @@ function pageCompare(){
         +`<p><b>Growth and trade.</b> World output is projected near ${wld[gyG.indexOf('2026')].toFixed(1)}% in 2026 (and ${wld[gyG.indexOf('2027')].toFixed(1)}% in 2027) with China around ${chn[gyG.indexOf('2026')].toFixed(1)}%; steady but unspectacular external demand, alongside a gradual recovery in world trade volumes, frames the outlook for Cambodia’s exports and tourism.</p>`; }
   }
   const names=(C&&C.countries)||{KHM:'Cambodia',VNM:'Vietnam',THA:'Thailand',IDN:'Indonesia',MYS:'Malaysia',PHL:'Philippines',SGP:'Singapore',LAO:'Lao PDR',BRN:'Brunei',MMR:'Myanmar'};
-  const iso=Object.keys(names);
+  const iso=Object.keys(names).filter(c=>c!=='SGP'); /* ASEAN comparison excludes Singapore */
   const palette={KHM:p.gold,VNM:p.red,THA:'#7C3AED',IDN:p.emerald,MYS:p.royal,PHL:'#DB2777',SGP:p.navy,LAO:p.amber,BRN:'#0891B2',MMR:'#6B7280'};
   const hideCard=id=>{const el=document.getElementById(id);if(el){const c2=el.closest('.card');if(c2)c2.style.display='none';}};
   const pctLineOpts=()=>Object.assign(baseOpts(),{plugins:{legend:{position:'right',labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:8,font:{size:10}}},tooltip:{callbacks:{label:c2=>c2.dataset.label.replace(/ \S+$/,'')+': '+fmt(c2.raw)+'%'}}},
@@ -3816,7 +3816,7 @@ function pageCompare(){
   if(D.cpiCmp){
     const CP=D.cpiCmp, yl3=(RANGE===0?CP.dates:CP.dates.slice(-RANGE));
     const nm2=Object.assign({TLS:'Timor-Leste'},names), pal2=Object.assign({TLS:'#0EA5A5'},palette);
-    const order=Object.keys(CP.series).filter(c=>CP.series[c]&&CP.series[c].some(v=>v!=null)).sort((a,b)=>(a==='KHM')-(b==='KHM'));
+    const order=Object.keys(CP.series).filter(c=>c!=='SGP'&&CP.series[c]&&CP.series[c].some(v=>v!=null)).sort((a,b)=>(a==='KHM')-(b==='KHM'));
     const cinf=order.map(c=>({
       label:flag(nm2[c]||c),data:sliceM(CP.series[c]),borderColor:pal2[c]||p.text2,
       borderWidth:c==='KHM'?3.5:1.6,pointRadius:c==='KHM'?(RANGE&&RANGE<=24?1.5:0):0,pointBackgroundColor:pal2[c]||p.text2,
