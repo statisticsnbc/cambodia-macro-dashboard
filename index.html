@@ -2172,24 +2172,44 @@ function fuelInit(){
   const card=cv.closest('.card');
   const setSub=t=>{const e=document.getElementById('cs_fuel'); if(e)e.textContent=t;};
   const base='https://data.mef.gov.kh/api/v1/public-datasets/pd_681d89b4dbc953000126f5e7/json';
+  /* Replace the empty canvas with a readable explanation. Every other chart in
+     this dashboard is served from embedded data; this one alone depends on a
+     live third-party API, so it must fail visibly rather than silently. */
+  const fuelMsg=(head,detail)=>{
+    const ch=card?card.querySelector('.ch'):null; if(!ch) return;
+    ch.innerHTML='<div style="height:100%;display:flex;flex-direction:column;align-items:center;'
+      +'justify-content:center;text-align:center;padding:18px;gap:7px">'
+      +'<div style="font-size:12.5px;font-weight:600;color:var(--text)">'+head+'</div>'
+      +'<div style="font-size:11.5px;color:var(--text2);line-height:1.55;max-width:430px">'+detail+'</div>'
+      +'<a href="https://data.mef.gov.kh/datasets/pd_681d89b4dbc953000126f5e7" target="_blank" '
+      +'rel="noopener" style="font-size:11.5px;font-weight:600;color:var(--royal);text-decoration:none">'
+      +'Open the dataset at data.mef.gov.kh &#8599;</a></div>';
+  };
   (async()=>{
     try{
       let rows=[];
       for(let pg=1; pg<=60; pg++){
         const r=await fetch(base+'?page='+pg+'&page_size=100');
-        if(!r.ok) break;
+        if(!r.ok) throw new Error('HTTP '+r.status);
         const j=await r.json();
         const arr=Array.isArray(j)?j:(j.data||j.results||j.records||j.rows||j.items||[]);
         if(!arr||!arr.length) break;
         rows=rows.concat(arr);
         if(arr.length<100) break;
       }
-      if(!rows.length){ setSub('In Khmer Riel — live data returned no rows from MEF Open Data'); return; }
+      if(!rows.length){
+        setSub('In Khmer Riel — no rows returned');
+        fuelMsg('No data returned','The MEF Open Data service responded but returned no rows for this dataset.');
+        return;
+      }
       renderFuel(rows); setSub('In Khmer Riel');
     }catch(e){
       console.error('fuel fetch',e);
-      setSub('In Khmer Riel — live data unavailable (could not reach data.mef.gov.kh)');
-      if(card){ const ch=card.querySelector('.ch'); if(ch) ch.style.opacity=.35; }
+      setSub('In Khmer Riel — live data unavailable');
+      fuelMsg('Live data could not be loaded',
+        'This chart reads directly from the MEF Open Data API each time the page opens. '
+        +'The request did not complete \u2014 usually because the browser blocked the cross-origin call, '
+        +'or the service was unavailable.');
     }
   })();
 }
