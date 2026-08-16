@@ -2021,7 +2021,12 @@ function tourRecCombined(){
   const H=D.tourHist,Q=D.Q;
   const hy=H?H.years.filter(function(y){return y>=1993&&y<=2018;}):[];
   const histLab=hy.map(String);
-  const histRec=hy.map(function(y){return H.receipts[String(y)];});
+  /* Receipts history is an ANNUAL TOTAL while the recent series is quarterly.
+     Scale the history to the displayed frequency so the two join smoothly;
+     the share-of-GDP series is a ratio and is never rescaled. */
+  const _rDiv=(FREQ==='Y')?1:4;
+  const histRec=hy.map(function(y){var v=H.receipts[String(y)];
+    return v!=null?+(v/_rDiv).toFixed(1):null;});
   const histShare=hy.map(function(y){return H.share[String(y)];});
   const qs=D.qdates.map(function(q,i){return {q:q,i:i};}).filter(function(o){return /Q/.test(o.q)&&+o.q.slice(0,4)>=2019;});
   const qRec=qs.map(function(o){return Q.serv_rec_travel[o.i];});
@@ -2037,7 +2042,7 @@ function tourRecCombined(){
 function tourRecRender(id,csId){
   const el=document.getElementById(id);if(!el)return;
   const p=P(),C=tourRecCombined();
-  mk(id,{type:'bar',data:{labels:C.labels,datasets:[
+  mk(id,rngCfg({type:'bar',data:{labels:C.labels,datasets:[
     {type:'bar',label:'Tourism Receipts (Million USD)',data:C.rec,backgroundColor:p.royal+'CC',borderColor:p.royal,borderWidth:0,borderRadius:2,yAxisID:'y',order:2},
     {type:'line',label:'Tourism Share of GDP (%)',data:C.share,borderColor:p.gold,backgroundColor:p.gold,borderWidth:2.4,pointRadius:0,tension:.3,spanGaps:true,yAxisID:'y2',order:1}]},
     options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:p.text2,boxWidth:12,usePointStyle:true,pointStyle:'rectRounded',padding:12,font:{size:10.5}}},
@@ -2045,7 +2050,7 @@ function tourRecRender(id,csId){
       scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},
         y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:function(v){return fmt0(v);}}},
         y2:{position:'right',grid:{display:false},ticks:{color:p.gold,callback:function(v){return v+'%';}}}}}),
-    plugins:[freqDivider(C.divIdx,'annual \u2192 quarterly')]});
+    plugins:(FREQ==='Y')?[]:[freqDivider(C.divIdx,'annual \u2192 quarterly')]},3,['sum','mean']));
 }
 function rsTourismInit(){
   const p=P(), M=D.M;
@@ -2582,12 +2587,15 @@ function pageReal(){
   {const T0=D.gdp3||{q:[],ngdp:[],rgdp:[],defl:[]};
    /* National accounts are quarterly at source. Yearly sums the four quarters
       for the GDP levels; the deflator is an index, so it takes the year end. */
-   const _QA=aggQDates(T0.q,FREQ);
+   /* The Real Sector has no frequency selector, so the national accounts stay
+      at their published quarterly frequency regardless of any choice made on
+      another page. */
+   const _QA=aggQDates(T0.q,'Q');
    const T={q:_QA.labels,
-            ngdp:aggQFlow(T0.q,T0.ngdp,FREQ),
-            rgdp:aggQFlow(T0.q,T0.rgdp,FREQ),
-            defl:aggQLast(T0.q,T0.defl,FREQ)};
-   const _rppy=(FREQ==='Y'?1:4);
+            ngdp:aggQFlow(T0.q,T0.ngdp,'Q'),
+            rgdp:aggQFlow(T0.q,T0.rgdp,'Q'),
+            defl:aggQLast(T0.q,T0.defl,'Q')};
+   const _rppy=4;
    const nY=(RANGE===0)?T.q.length:Math.max(2,Math.ceil(RANGE*_rppy/12));
    const tkT=a=>a.slice(Math.max(0,a.length-nY));
    mk('r_ngdp',{type:'line',data:{labels:tkT(T.q),datasets:[
@@ -2601,9 +2609,8 @@ function pageReal(){
        scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},
          y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:function(v){return fmt0(v/1000);}}},
          y2:{position:'right',grid:{display:false},ticks:{color:p.gold}}}})});}
-  { const _QG=(FREQ==='Y')?{q:(D.gdpAnnualI&&D.gdpAnnualI.years)||[],g:(D.gdpAnnualI&&D.gdpAnnualI.g)||[]}:QI;
-    const _qn=(FREQ==='Y')?naY:naQ;
-    const qq=tk(_QG.q,_qn), qg=tk(_QG.g,_qn); mk('r_gdpq',{type:'bar',data:{labels:qq.map(q=>String(q).slice(2)),datasets:[{data:qg,backgroundColor:hexA(p.royal,.5),borderColor:p.royal,borderWidth:1,borderRadius:2}]},options:Object.assign(baseOpts(),{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})}); const AN=D.gdpAnnualI||{years:[],g:[]}; let ay=AN.years.slice(), ag=AN.g.slice(); if(ay.length&&String(ay[ay.length-1])==='2026'){ ay=ay.slice(); ag=ag.slice(); ay[ay.length-1]='2026F'; } ay=tk(ay,naY); ag=tk(ag,naY); let em=0,mx=-1e9; ag.forEach((v,i)=>{if(v!=null&&Math.abs(v)>mx){mx=Math.abs(v);em=i;}}); const acol=ag.map((v,i)=> v<0? hexA(p.red,.6) : hexA(p.emerald,.6)); const albl={id:'ragl',afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.font='700 9.5px Inter,sans-serif';g.fillStyle=P().text;m.data.forEach((el,i)=>{const v=ag[i];if(v==null)return;g.textAlign='center';g.textBaseline=v<0?'top':'bottom';g.fillText(fmt(v,1),el.x,v<0?el.y+3:el.y-3);});g.restore();}}; mk('r_gdpa',{type:'bar',plugins:[albl],data:{labels:ay,datasets:[{data:ag,backgroundColor:acol,borderColor:'transparent',borderWidth:0,borderRadius:2}]},options:Object.assign(baseOpts(),{layout:{padding:{top:14}},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:16}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})}); }
+  { const _QG=QI;                 // quarterly growth stays quarterly on this page
+    const qq=tk(_QG.q,naQ), qg=tk(_QG.g,naQ); mk('r_gdpq',{type:'bar',data:{labels:qq.map(q=>String(q).slice(2)),datasets:[{data:qg,backgroundColor:hexA(p.royal,.5),borderColor:p.royal,borderWidth:1,borderRadius:2}]},options:Object.assign(baseOpts(),{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})}); const AN=D.gdpAnnualI||{years:[],g:[]}; let ay=AN.years.slice(), ag=AN.g.slice(); if(ay.length&&String(ay[ay.length-1])==='2026'){ ay=ay.slice(); ag=ag.slice(); ay[ay.length-1]='2026F'; } ay=tk(ay,naY); ag=tk(ag,naY); let em=0,mx=-1e9; ag.forEach((v,i)=>{if(v!=null&&Math.abs(v)>mx){mx=Math.abs(v);em=i;}}); const acol=ag.map((v,i)=> v<0? hexA(p.red,.6) : hexA(p.emerald,.6)); const albl={id:'ragl',afterDatasetsDraw(ch){const g=ch.ctx,m=ch.getDatasetMeta(0);g.save();g.font='700 9.5px Inter,sans-serif';g.fillStyle=P().text;m.data.forEach((el,i)=>{const v=ag[i];if(v==null)return;g.textAlign='center';g.textBaseline=v<0?'top':'bottom';g.fillText(fmt(v,1),el.x,v<0?el.y+3:el.y-3);});g.restore();}}; mk('r_gdpa',{type:'bar',plugins:[albl],data:{labels:ay,datasets:[{data:ag,backgroundColor:acol,borderColor:'transparent',borderWidth:0,borderRadius:2}]},options:Object.assign(baseOpts(),{layout:{padding:{top:14}},plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:16}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})}); }
   mk('r_pc',{type:'line',data:{labels:tk(yl,naY),datasets:[{label:'GDP per capita $',data:tk(D.pcWB||G.pc_usd,naY),borderColor:p.emerald,backgroundColor:grad('r_pc',p.emerald),fill:true,borderWidth:2.2,pointRadius:0,tension:.35}]},options:Object.assign(baseOpts(),{plugins:{legend:{display:false}}})});
   if(D.outputGap){const OG=D.outputGap; const yr=tk(OG.years,naQ); let ac=tk(OG.actual,naQ), po=tk(OG.potential,naQ); const gp=tk(OG.gap,naQ); ac=ac.map(v=>v==null?null:+v.toFixed(1)); po=po.map(v=>v==null?null:+v.toFixed(1));
     mk('r_gap',{type:'bar',data:{labels:yr.map(q=>q.slice(2)),datasets:[
@@ -2838,23 +2845,25 @@ function _coarsenCfg(cfg,target,mode){
     var keys=L.map(_labKey); if(keys.some(function(k){return !k;})) return cfg;
     var order=[],idx={};
     keys.forEach(function(k,i){
-      var b=(target==='Y')?k.y:(k.y+'Q'+k.q);
+      var b=(target==='Y')?k.y:(k.q?(k.y+'Q'+k.q):k.y);
       if(!(b in idx)){ idx[b]=[]; order.push(b); }
       idx[b].push(i);
     });
     if(order.length===L.length) return cfg;              // already at that frequency
     cfg.data.labels=order.map(function(b){
-      return (target==='Y')?b:(b.slice(2));
+      if(target==='Y') return b;
+      return /Q[1-4]$/.test(b) ? b.slice(2) : b;   // keep plain years readable
     });
-    (cfg.data.datasets||[]).forEach(function(d){
+    (cfg.data.datasets||[]).forEach(function(d,di){
       if(!Array.isArray(d.data)) return;
+      var mo=Array.isArray(mode)?(mode[di]||'sum'):mode;
       d.data=order.map(function(b){
         var vals=idx[b].map(function(i){return d.data[i];})
                        .filter(function(v){return v!=null&&!isNaN(v);});
         if(!vals.length) return null;
-        if(mode==='last') return vals[vals.length-1];
+        if(mo==='last') return vals[vals.length-1];
         var sum=vals.reduce(function(a,c){return a+c;},0);
-        return +( (mode==='mean') ? (sum/vals.length) : sum ).toFixed(2);
+        return +( (mo==='mean') ? (sum/vals.length) : sum ).toFixed(2);
       });
       ['backgroundColor','borderColor'].forEach(function(kk){
         if(Array.isArray(d[kk]) && d[kk].length!==cfg.data.labels.length){
@@ -2889,12 +2898,15 @@ function pageExternal(){
     return a.length<=_eSpan?a.slice():a.slice(-_eSpan); };
   const _EA=aggDates(D.mdates,FREQ);
   const ml=_slE(_EA.labels);
+  /* NEER/REER are index changes published monthly - kept monthly by design */
+  const _mlM=(RANGE===0)?D.mdates.map(monLab):D.mdates.map(monLab).slice(-RANGE);
+  const _monM=a=>(RANGE===0)?(a||[]).slice():(a||[]).slice(-RANGE);
   const sumE=a=>_slE(aggFlow(D.mdates,a||[],FREQ));   // flows: exports, imports
   const lastE=a=>_slE(aggLast(D.mdates,a||[],FREQ));  // rates and indices
   // International Investment Position (quarterly, BOP mirror style)
   if(D.iip){const _EI=(D.extV2&&D.extV2.iip)||(D.extHist&&D.extHist.iip)||{dates:[],assets:[],liab:[],net:[]};const I={dates:[..._EI.dates,...D.iip.dates],assets:[..._EI.assets,...D.iip.assets],liab:[..._EI.liab,...D.iip.liab],net:[..._EI.net,...D.iip.net]},nq=RANGE===0?I.dates.length:Math.ceil(RANGE/3);
     const sq=a=>a.slice(-nq);
-    mk('e_iip',rngCfg({type:'bar',data:{labels:sq(I.dates).map(function(q){return String(q).slice(2);}),datasets:[
+    mk('e_iip',rngCfg({type:'bar',data:{labels:sq(I.dates).slice(),datasets:[
       {type:'bar',label:'Net IIP',data:sq(I.net),backgroundColor:'#5C6BC0CC',borderRadius:2,order:9},
       {type:'line',label:'External Assets',data:sq(I.assets),borderColor:'#4DB6AC',backgroundColor:grad('e_iip','#4DB6AC',.4),fill:'origin',borderWidth:1.8,pointRadius:0,tension:.3,order:2},
       {type:'line',label:'External Liabilities (shown × −1)',data:sq(I.liab).map(v=>v==null?null:-v),borderColor:'#E57373',backgroundColor:grad('e_iip','#E57373',.4),fill:'origin',borderWidth:1.8,pointRadius:0,tension:.3,order:3}]},
@@ -3003,7 +3015,7 @@ function pageExternal(){
     const mkRemit=(id,byCtry,total,scale,unit)=>{
       const ds=R.countries.map((c,idx)=>({label:String(c).trim(),data:(byCtry[c]||[]).map(v=>v==null?null:v/scale),backgroundColor:remitPal[idx%remitPal.length]+'CC',stack:'s',borderRadius:2}));
       ds.push({label:'Total',type:'line',data:(total||[]).map(v=>v==null?null:v/scale),borderColor:p.navy,borderWidth:2.4,pointRadius:0,tension:.3,order:0});
-      mk(id,rngCfg({type:'bar',data:{labels:rl.map(function(q){return String(q).slice(2);}),datasets:ds},
+      mk(id,rngCfg({type:'bar',data:{labels:rl.slice(),datasets:ds},
         options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:9,usePointStyle:true,padding:5,font:{size:9}}},tooltip:{callbacks:{label:c2=>c2.dataset.label+': '+fmt(c2.raw)+unit}}},
         scales:{x:{stacked:true,grid:{display:false},ticks:{color:p.text2,maxTicksLimit:10,maxRotation:0}},y:{stacked:true,grid:{color:p.line},border:{display:false},ticks:{color:p.text2}}}})},3,_remitMode));
     };
@@ -3038,12 +3050,12 @@ function pageExternal(){
     options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:10,usePointStyle:true,padding:7,font:{size:10}}}},
     scales:{x:{stacked:true,grid:{display:false},ticks:{color:p.text2,maxTicksLimit:16,maxRotation:0}},y:{stacked:true,grid:{color:p.line},border:{display:false},ticks:{color:p.text2}}}})},3));
   // International tourism (moved from Real Sector)
-  {const H=D.tourHist, hy=H?H.years.filter(function(y){return y>=1993&&y<=2018;}):[];var _hLab=hy.map(String), _hArr=hy.map(function(y){var v=H.arrivals[String(y)];return v!=null?Math.round(v/12):null;});var t0=D.mdates.indexOf('2019-01'), mi=t0>=0?t0:0;var _mDates=D.mdates.slice(mi), _mArr=M.tour.slice(mi), _mG=M.tour_g.slice(mi);var _gro=_mG.map(function(v,i){return (_mDates[i]>=YOY_FROM)?v:null;});var _cLab=_hLab.concat(_mDates.map(monLab)), _cArr=_hArr.concat(_mArr), _cGro=_hLab.map(function(){return null;}).concat(_gro), _cDiv=_hLab.length;mk('r_tour',rngCfg({type:'line',data:{labels:_cLab,datasets:[{label:'Tourist Arrivals',data:_cArr,type:'line',fill:'origin',spanGaps:false,backgroundColor:grad('r_tour',p.royal,.42),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y'}]},options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:12,usePointStyle:true,pointStyle:'rectRounded',padding:12,font:{size:10}}},
+  {const H=D.tourHist, hy=H?H.years.filter(function(y){return y>=1993&&y<=2018;}):[];/* The 1993-2018 history is an ANNUAL TOTAL, scaled down so it sits on the same axis as the monthly series. The divisor must follow the selected frequency, otherwise the yearly view compares an average month against a full-year total and shows a false 12x jump at 2019. */ var _hDiv=(FREQ==='Y')?1:((FREQ==='Q')?4:12); var _hLab=hy.map(String), _hArr=hy.map(function(y){var v=H.arrivals[String(y)];return v!=null?Math.round(v/_hDiv):null;});var t0=D.mdates.indexOf('2019-01'), mi=t0>=0?t0:0;var _mDates=D.mdates.slice(mi), _mArr=M.tour.slice(mi), _mG=M.tour_g.slice(mi);var _gro=_mG.map(function(v,i){return (_mDates[i]>=YOY_FROM)?v:null;});var _cLab=_hLab.concat(_mDates.map(monLab)), _cArr=_hArr.concat(_mArr), _cGro=_hLab.map(function(){return null;}).concat(_gro), _cDiv=_hLab.length;mk('r_tour',rngCfg({type:'line',data:{labels:_cLab,datasets:[{label:'Tourist Arrivals',data:_cArr,type:'line',fill:'origin',spanGaps:false,backgroundColor:grad('r_tour',p.royal,.42),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.3,yAxisID:'y'}]},options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:12,usePointStyle:true,pointStyle:'rectRounded',padding:12,font:{size:10}}},
      tooltip:{callbacks:{label:function(c){return 'Arrivals: '+fmt0(c.raw)+' visitors';},
        afterLabel:function(c){var n=c.chart.data.labels.length,off=_cGro.length-n,i=off+c.dataIndex;
          var g=_cGro[i],pv=(i>0?_cGro[i-1]:null);
          return (g==null)?'':'y/y growth: '+growthArrow(g,pv);}}}},
-     scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:function(v){return fmt0(v/1000)+'k';}}}}}),plugins:[freqDivider(_cDiv,'annual avg/mo \u2192 monthly')]},1,'sum'));
+     scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:function(v){return fmt0(v/1000)+'k';}}}}}),plugins:(FREQ==='M')?[freqDivider(_cDiv,'annual avg/mo \u2192 monthly')]:[]},1,'sum'));
    }
   tourRecRender('r_rec','cs_r_rec');
   // FDI inflow-to-GDP ratio with one-sided HP trend (Credit-to-GDP style)
@@ -3084,9 +3096,9 @@ function pageExternal(){
      const e1=document.getElementById('cs_resshare');if(e1)e1.textContent='Share of Foreign Exchange Reserves (%)';
      const e2=document.getElementById('cs_rescomp');if(e2)e2.textContent='By Instrument (Million USD)';
    }}
-  mk('e_reer',{type:'line',data:{labels:ml,datasets:[
-    {label:'NEER % y/y',data:lastE(M.neer_x),borderColor:p.royal,borderWidth:2.2,pointRadius:0,tension:.35},
-    {label:'REER % y/y',data:lastE(M.reer_x),borderColor:p.red,borderWidth:2.2,pointRadius:0,tension:.35}]},
+  mk('e_reer',{type:'line',data:{labels:_mlM,datasets:[
+    {label:'NEER % y/y',data:_monM(M.neer_x),borderColor:p.royal,borderWidth:2.2,pointRadius:0,tension:.35},
+    {label:'REER % y/y',data:_monM(M.reer_x),borderColor:p.red,borderWidth:2.2,pointRadius:0,tension:.35}]},
     options:baseOpts(),plugins:[signFill(),zeroLine('y')]});
   const gq=D.qdates.map((q,i)=>({q,i})).filter(o=>o.q.includes('Q')&&+o.q.slice(0,4)>=2019&&D.Q.ged[o.i]!=null);
   const ngAnn=(D.fiscalX&&D.fiscalX.ngdp_usd_ann)||null;
@@ -3125,6 +3137,16 @@ function pageMonetary(){
       return aggLast(_mdAll,merged,FREQ); }
     return _slF(aggLast(D.mdates,(M[k]||[]),FREQ)); };
   const _CF=(D.v4&&D.v4.cpiFull)||null;
+  /* Pinned to monthly by policy: inflation, the exchange rate and interest
+     rates are monitored monthly, so they ignore the frequency selector. */
+  const _pinAll=_mdAll.map(monLab);
+  const _pinLab=(RANGE===0)?_pinAll.slice():_pinAll.slice(-RANGE);
+  const _pinCur=(RANGE===0)?D.mdates.map(monLab):D.mdates.map(monLab).slice(-RANGE);
+  const _pinS=(k)=>(RANGE===0)?((HM[k]||HM.dates.map(function(){return null;})).concat(M[k]||[]))
+                              :sliceM(M[k]||[]);
+  const _pinArr=a=>(RANGE===0)?(a||[]).slice():(a||[]).slice(-RANGE);
+  const _pinCFL=()=>_CF?((RANGE===0)?_CF.dates.map(monLab):_CF.dates.map(monLab).slice(-RANGE)):_pinLab;
+  const _pinCF=(k)=>_CF?_pinArr(_CF[k]||[]):_pinS(k);
   const _LC=_CF?aggDates(_CF.dates,FREQ):null;
   const _cfLab=_LC?_LC.labels:[];
   const cfL=()=>_CF?((RANGE===0)?_cfLab.slice():_slF(_cfLab)):mlH;
@@ -3169,9 +3191,17 @@ function pageMonetary(){
     const _gh=(D.v3&&D.v3.govDepHist)||null;
     const _hu=(RANGE===0&&_gh)?_gh.map(function(k,i){var fx=(HM.fx||[])[i];return (k!=null&&fx)?+(k*1000/fx).toFixed(2):null;}):[];
     const _cu=md.map((dt,i)=>{ const k=gr[dt], fx=fxA[i]; return (k!=null&&fx)? +(k*1000/fx).toFixed(2):null; });
-    const usd=(RANGE===0&&_gh)?_hu.concat(_cu):_slF(_cu);
-    const yoy=usd.map((v,i)=> (i>=12 && v!=null && usd[i-12]!=null && usd[i-12]!=0)? +(((v/usd[i-12])-1)*100).toFixed(1):null);
-    mk('m_govdep',{data:{labels:(RANGE===0&&_gh)?mlH:mlabels(),datasets:[
+    /* Government deposits are a STOCK: coarsening takes the period-end balance,
+       never a sum. Labels and data must be aggregated over the same date list,
+       otherwise Chart.js pairs annual labels with monthly values. */
+    const _gdDates=(RANGE===0&&_gh)?((HM.dates||[]).concat(md)):md;
+    const _gdRaw  =(RANGE===0&&_gh)?_hu.concat(_cu):_cu;
+    const _gdAll  =aggLast(_gdDates,_gdRaw,FREQ);
+    const usd=(RANGE===0&&_gh)?_gdAll:_slF(_gdAll);
+    const _gdLag=PPY();
+    const yoy=usd.map((v,i)=> (i>=_gdLag && v!=null && usd[i-_gdLag]!=null && usd[i-_gdLag]!=0)
+                ? +(((v/usd[i-_gdLag])-1)*100).toFixed(1):null);
+    mk('m_govdep',{data:{labels:(RANGE===0&&_gh)?mlH:ml,datasets:[
       {type:'line',label:'Government deposits (Billion USD)',data:usd,yAxisID:'y',borderColor:p.royal,backgroundColor:grad('m_govdep',p.royal,.15),fill:true,borderWidth:2.2,pointRadius:0,tension:.3,spanGaps:true},
     ]},options:Object.assign(baseOpts(),{plugins:{legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:10},color:p.text2}},
       tooltip:{callbacks:{label:function(c){return 'Government deposits: '+usdB(c.raw);},
@@ -3196,11 +3226,11 @@ function pageMonetary(){
      ];
      kel.innerHTML=defs.map(([l,v,d,u,c,ch])=>`<div class="kpi${ch?' kpi-link':''}" style="--kc:var(${c})"${ch?` title="View chart →" onclick="goTo('monetary','${ch}')"`:''}><div class="period">${d}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':fmt(v,u===' riel'?0:1)}<small>${u}</small></div></div>`).join('');
    }}
-  mk('m_cpi',trimCfg({type:'line',data:{labels:cfL(),datasets:[
-    {label:'Headline Inflation',data:cfS('infl'),borderColor:p.navy,borderWidth:2.6,pointRadius:0,tension:.35},
-    {label:'Core Inflation',data:cfS('core'),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
-    {label:'Food Inflation',data:cfS('food'),borderColor:p.emerald,borderWidth:1.6,pointRadius:0,tension:.35},
-    {label:'Oil-Related Inflation',data:cfS('oil'),borderColor:p.red,borderWidth:1.6,pointRadius:0,tension:.35}]},options:baseOpts()}));
+  mk('m_cpi',trimCfg({type:'line',data:{labels:_pinCFL(),datasets:[
+    {label:'Headline Inflation',data:_pinCF('infl'),borderColor:p.navy,borderWidth:2.6,pointRadius:0,tension:.35},
+    {label:'Core Inflation',data:_pinCF('core'),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
+    {label:'Food Inflation',data:_pinCF('food'),borderColor:p.emerald,borderWidth:1.6,pointRadius:0,tension:.35},
+    {label:'Oil-Related Inflation',data:_pinCF('oil'),borderColor:p.red,borderWidth:1.6,pointRadius:0,tension:.35}]},options:baseOpts()}));
   { const C=D.cpi, HF=(D.v4&&D.v4.heatFull)||null, HX=(D.v3&&D.v3.cpiHeat)||{dates:[],series:{}};
     const hdates=HF?HF.dates:HX.dates.concat(C.dates);
     const hser={}; Object.keys(C.series).forEach(function(k){ hser[k]=HF?((HF.series&&HF.series[k])||[]):((HX.series&&HX.series[k])||HX.dates.map(function(){return null;})).concat(C.series[k]); });
@@ -3244,21 +3274,21 @@ function pageMonetary(){
     {label:'KHR Deposits',data:sM('lcd'),borderColor:p.gold,backgroundColor:p.gold+'40',fill:true,borderWidth:1.6,pointRadius:0,tension:.3,stack:'a'}]},
     options:Object.assign(baseOpts(),{scales:{x:{stacked:true,grid:{display:false},ticks:{color:p.text2,maxTicksLimit:10}},y:{stacked:true,max:100,grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})}));
   const _gFX=sM('fx_yoy');
-  mk('m_fx',trimCfg({type:'line',data:{labels:mlH,datasets:[
-    {label:'KHR/USD (End-of-Month)',data:sM('fx'),borderColor:p.navy,borderWidth:2.2,pointRadius:0,tension:.35}]},
+  mk('m_fx',trimCfg({type:'line',data:{labels:_pinLab,datasets:[
+    {label:'KHR/USD (End-of-Month)',data:_pinS('fx'),borderColor:p.navy,borderWidth:2.2,pointRadius:0,tension:.35}]},
     options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:6,font:{size:9.5}}},
       tooltip:{callbacks:{label:function(c){return 'KHR/USD: '+fmt0(c.raw);},
         afterLabel:function(c){var n=c.chart.data.labels.length,off=_gFX.length-n,i=off+c.dataIndex;
           var g=_gFX[i],pv=(i>0?_gFX[i-1]:null);return (g==null)?'':'y/y change: '+growthArrow(g,pv);}}}},
       scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:10}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2}}}})}));
-  mk('m_rates',trimCfg({type:'line',data:{labels:mlH,datasets:[
-    {label:'KHR Term Loan',data:sM('r_khr_loan'),borderColor:p.red,borderWidth:2,pointRadius:0,tension:.35},
-    {label:'USD Term Loan',data:sM('r_usd_loan'),borderColor:p.navy,borderWidth:2,pointRadius:0,tension:.35},
-    {label:'KHR Term Deposit',data:sM('r_khr_dep'),borderColor:p.gold,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
-    {label:'USD Term Deposit',data:sM('r_usd_dep'),borderColor:p.emerald,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]}]},options:baseOpts()}));
-  const _rkl=sM('r_khr_loan'),_rkd=sM('r_khr_dep'),spr_khr=_rkl.map((v,i)=>v!=null&&_rkd[i]!=null?+(v-_rkd[i]).toFixed(2):null);
-  const _rul=sM('r_usd_loan'),_rud=sM('r_usd_dep'),spr_usd=_rul.map((v,i)=>v!=null&&_rud[i]!=null?+(v-_rud[i]).toFixed(2):null);
-  mk('m_spread',trimCfg({type:'line',data:{labels:mlH,datasets:[
+  mk('m_rates',trimCfg({type:'line',data:{labels:_pinLab,datasets:[
+    {label:'KHR Term Loan',data:_pinS('r_khr_loan'),borderColor:p.red,borderWidth:2,pointRadius:0,tension:.35},
+    {label:'USD Term Loan',data:_pinS('r_usd_loan'),borderColor:p.navy,borderWidth:2,pointRadius:0,tension:.35},
+    {label:'KHR Term Deposit',data:_pinS('r_khr_dep'),borderColor:p.gold,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
+    {label:'USD Term Deposit',data:_pinS('r_usd_dep'),borderColor:p.emerald,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]}]},options:baseOpts()}));
+  const _rkl=_pinS('r_khr_loan'),_rkd=_pinS('r_khr_dep'),spr_khr=_rkl.map((v,i)=>v!=null&&_rkd[i]!=null?+(v-_rkd[i]).toFixed(2):null);
+  const _rul=_pinS('r_usd_loan'),_rud=_pinS('r_usd_dep'),spr_usd=_rul.map((v,i)=>v!=null&&_rud[i]!=null?+(v-_rud[i]).toFixed(2):null);
+  mk('m_spread',trimCfg({type:'line',data:{labels:_pinLab,datasets:[
     {label:'KHR Interest Rate Spread',data:spr_khr,borderColor:p.red,backgroundColor:grad('m_spread',p.red,.12),fill:true,borderWidth:2,pointRadius:0,tension:.35},
     {label:'USD Interest Rate Spread',data:spr_usd,borderColor:p.navy,borderWidth:2,pointRadius:0,tension:.35}]},options:baseOpts()}));
   const _h2r=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
@@ -3304,7 +3334,7 @@ function pageMonetary(){
      options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:7,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.royal}},y2:{position:'right',grid:{display:false},ticks:{color:p.gold,callback:v=>v+'×'}}}})}));}
   // Interest rates by product (Weighted Average Rate on New Amount)
   const irCols=['#2563EB','#5B8DEF','#0B2545','#93A1B5','#D68910','#C0392B','#8E44AD','#2E8B57'];
-  const irChart=(id,obj,pick)=>{if(!obj)return;const keys=Object.keys(obj).filter(function(k){return !pick||pick.indexOf(k)>=0;});mk(id,{type:'line',data:{labels:ml,datasets:keys.map((k,i)=>({label:k,data:_slF(obj[k]),borderColor:irCols[i%irCols.length],borderWidth:1.8,pointRadius:0,tension:.3}))},
+  const irChart=(id,obj,pick)=>{if(!obj)return;const keys=Object.keys(obj).filter(function(k){return !pick||pick.indexOf(k)>=0;});mk(id,{type:'line',data:{labels:_pinCur,datasets:keys.map((k,i)=>({label:k,data:_pinArr(obj[k]),borderColor:irCols[i%irCols.length],borderWidth:1.8,pointRadius:0,tension:.3}))},
     options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:10,usePointStyle:true,padding:6,font:{size:9.5}}}},
     scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12,maxRotation:0}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});};
   const IR_DEP=['Demand Deposits','Saving Deposits','Term Deposits','Other Deposits'];
