@@ -1783,6 +1783,11 @@ const charts = {};
 const lastIdx = a => { if(!a) return -1; for(let i=a.length-1;i>=0;i--) if(a[i]!=null) return i; return -1; };
 const lastVal = a => { const i=lastIdx(a); return i<0?null:a[i]; };
 const qLab = a => { const i=lastIdx(a); return i<0?'—':D.qdates[i]; };
+/* Period labels are shown as "Q1 2026"; a quarter written 2026Q1 or 26Q1 is reflowed. */
+const qFmt = v => { const t=String(v==null?'':v);
+  let m=t.match(/^(\d{4})Q([1-4])$/); if(m) return 'Q'+m[2]+' '+m[1];
+  m=t.match(/^(\d{2})Q([1-4])$/);     if(m) return 'Q'+m[2]+' 20'+m[1];
+  return t; };
 // FSI series at native frequency (quarterly to 2023, MONTHLY from Jan 2024) with matching labels
 const FSIS = () => (D.fsi&&D.fsi.series)||D.Q;
 const /* Which period a KPI's change is measured against, so the card can say
@@ -1966,39 +1971,33 @@ function kpiRow(){
   const M=D.M, i=lastIdx(M.infl), d=D.mdates;
   const yGdpI=D.Y.gdp_g.length-2; // 2025 estimate
   const defs=[
-    {l:'GDP Growth',cmp:'Y-o-Y',v:3.9,suf:'%',prev:D.Y.gdp_g[yGdpI],spark:D.Y.gdp_g,goodUp:true,per:'2026F',color:'--royal',note:'NBC'},
-    {l:'Inflation (CPI)',cmp:'M-o-M',v:lastVal(M.infl),suf:'%',prev:valAt(M.infl,lastIdx(M.infl)-1),spark:M.infl,goodUp:false,per:monLab(d[lastIdx(M.infl)]),color:'--red'},
-    {l:'Core Inflation',cmp:'M-o-M',v:lastVal(M.core),suf:'%',prev:valAt(M.core,lastIdx(M.core)-1),spark:M.core,goodUp:false,per:monLab(d[lastIdx(M.core)]),color:'--amber'},
-    {l:'Exchange Rate',cmp:'M-o-M',v:lastVal(M.fx),suf:'',prev:valAt(M.fx,lastIdx(M.fx)-1),spark:M.fx,goodUp:false,per:monLab(d[lastIdx(M.fx)]),color:'--navy2',d:0,note:'KHR/USD'},
-    {l:'Intl. Reserves',cmp:'M-o-M',v:lastVal(M.res)/1000,suf:' Billion USD',prev:valAt(M.res,lastIdx(M.res)-1)/1000,spark:M.res,goodUp:true,per:monLab(d[lastIdx(M.res)]),color:'--emerald',note:fmt(lastVal(D.Q.res_mo),1)+' months of imports'},
-    {l:'Current Account',cmp:'Y-o-Y',v:lastVal(D.Y.ca_gdp),suf:'% GDP',prev:D.Y.ca_gdp[lastIdx(D.Y.ca_gdp)-1],spark:D.Y.ca_gdp,goodUp:true,per:qLab(D.Q.ca_gdp),color:'--royal'},
-    {l:'Fiscal Balance',cmp:'Y-o-Y',v:D.Y.bal_gdp[D.Y.bal_gdp.length-2],suf:'% GDP',prev:D.Y.bal_gdp[D.Y.bal_gdp.length-3],spark:D.Y.bal_gdp,goodUp:true,per:'2025p',color:'--gold'},
-    (function(){const B=D.mefDebt; if(!B) return {l:'Public Debt',cmp:'Y-o-Y',v:D.debt.total2025,suf:' Billion USD',prev:D.debt.total2025/(1+D.debt.growth/100),spark:null,goodUp:false,per:'2025',color:'--navy2'};
-      const n=B.periods.length-1, tot=k=>(B.stock.total_external[k]+B.domestic.stock[k])/1000;
-      return {l:'Public Debt',v:tot(n),suf:' Billion USD',prev:tot(0),spark:null,goodUp:false,
-        per:B.periods[n],color:'--navy2',note:'MEF bulletin',cmp:'vs '+B.periods[0]};})(),
-    {l:'Credit Growth',cmp:'M-o-M',v:lastVal(M.psc_g),suf:'%',prev:valAt(M.psc_g,lastIdx(M.psc_g)-1),spark:M.psc_g,goodUp:true,per:monLab(d[lastIdx(M.psc_g)]),color:'--royal'},
-    {l:'Broad Money (M2)',cmp:'M-o-M',v:lastVal(M.m2_g),suf:'%',prev:valAt(M.m2_g,lastIdx(M.m2_g)-1),spark:M.m2_g,goodUp:true,per:monLab(d[lastIdx(M.m2_g)]),color:'--emerald',note:'y/y growth'},
-    {l:'Deposit Growth',cmp:'M-o-M',v:lastVal(M.dep_g),suf:'%',prev:valAt(M.dep_g,lastIdx(M.dep_g)-1),spark:M.dep_g,goodUp:true,per:monLab(d[lastIdx(M.dep_g)]),color:'--emerald'},
+    {l:'GDP Growth',cmp:'Y-o-Y',v:3.9,suf:'%',prev:D.Y.gdp_g[yGdpI],spark:D.Y.gdp_g,goodUp:true,per:'2026F',color:'--royal',note:'NBC',nav:['real','r_gdpq']},
     (function(){ const pv=((D.pcWB||[]).filter(x=>x!=null));
       const g=(pv.length>=2)?((pv[pv.length-1]/pv[pv.length-2]-1)*100):null;
       const gp=(pv.length>=3)?((pv[pv.length-2]/pv[pv.length-3]-1)*100):null;
       const yrs=(D.gdpSector&&D.gdpSector.years)||[];
       return {l:'GDP per Capita Growth',cmp:'Y-o-Y',v:g,suf:'%',prev:gp,spark:null,goodUp:true,
         per:String(yrs[yrs.length-1]||'').replace('/p',''),color:'--emerald',
-        note:'World Bank, US$'+(pv.length?' '+fmt0(pv[pv.length-1]):'')};})(),
-    {l:'Exchange Rate (avg)',cmp:'M-o-M',v:lastVal(M.fx_avg),suf:'',prev:valAt(M.fx_avg,lastIdx(M.fx_avg)-1),spark:M.fx_avg,goodUp:false,per:monLab(d[lastIdx(M.fx_avg)]),color:'--navy2',d:0,note:'KHR/USD, monthly average'},
-    {l:'NPL Ratio',cmp:fsiCmp('npl'),v:lastVal(FSIS().npl),suf:'%',prev:valAt(FSIS().npl,lastIdx(FSIS().npl)-1),spark:FSIS().npl,goodUp:false,per:fsiLab('npl'),color:'--red'},
-    {l:'Banking ROA',cmp:fsiCmp('roa'),v:lastVal(FSIS().roa),suf:'%',prev:valAt(FSIS().roa,lastIdx(FSIS().roa)-1),spark:FSIS().roa,goodUp:true,per:fsiLab('roa'),color:'--gold',note:'FSI Framework'},
-    {l:'Banking ROE',cmp:fsiCmp('roe'),v:lastVal(FSIS().roe),suf:'%',prev:valAt(FSIS().roe,lastIdx(FSIS().roe)-1),spark:FSIS().roe,goodUp:true,per:fsiLab('roe'),color:'--gold',note:'FSI Framework'},
-    {l:'FCD Share to Total Deposits',cmp:'M-o-M',v:lastVal(M.fcd),suf:'%',prev:valAt(M.fcd,lastIdx(M.fcd)-1),spark:M.fcd,goodUp:false,per:monLab(d[lastIdx(M.fcd)]),color:'--navy2',note:'Dollarization'},
+        note:'World Bank, US$'+(pv.length?' '+fmt0(pv[pv.length-1]):''),nav:['real','r_pc']};})(),
+    {l:'Inflation (CPI)',cmp:'M-o-M',v:lastVal(M.infl),suf:'%',prev:valAt(M.infl,lastIdx(M.infl)-1),spark:M.infl,goodUp:false,per:monLab(d[lastIdx(M.infl)]),color:'--red',nav:['monetary','m_cpi']},
+    {l:'Core Inflation',cmp:'M-o-M',v:lastVal(M.core),suf:'%',prev:valAt(M.core,lastIdx(M.core)-1),spark:M.core,goodUp:false,per:monLab(d[lastIdx(M.core)]),color:'--amber',nav:['monetary','m_cpi']},
+    {l:'Exchange Rate (END)',cmp:'M-o-M',v:lastVal(M.fx),suf:'',prev:valAt(M.fx,lastIdx(M.fx)-1),spark:M.fx,goodUp:false,per:monLab(d[lastIdx(M.fx)]),color:'--navy2',d:0,note:'KHR/USD',nav:['monetary','m_fx']},
+    {l:'Exchange Rate (AVG)',cmp:'M-o-M',v:lastVal(M.fx_avg),suf:'',prev:valAt(M.fx_avg,lastIdx(M.fx_avg)-1),spark:M.fx_avg,goodUp:false,per:monLab(d[lastIdx(M.fx_avg)]),color:'--navy2',d:0,note:'KHR/USD',nav:['monetary','m_fx']},
+    {l:'Intl. Reserves',cmp:'M-o-M',v:lastVal(M.res)/1000,suf:' Billion USD',prev:valAt(M.res,lastIdx(M.res)-1)/1000,spark:M.res,goodUp:true,per:monLab(d[lastIdx(M.res)]),color:'--emerald',note:fmt(lastVal(D.Q.res_mo),1)+' months of imports',nav:['external','e_res']},
+    {l:'Current Account',cmp:'Y-o-Y',v:lastVal(D.Y.ca_gdp),suf:'% GDP',prev:D.Y.ca_gdp[lastIdx(D.Y.ca_gdp)-1],spark:D.Y.ca_gdp,goodUp:true,per:qLab(D.Q.ca_gdp),color:'--royal',nav:['external','e_bop']},
+    {l:'Fiscal Balance',cmp:'Y-o-Y',v:D.Y.bal_gdp[D.Y.bal_gdp.length-2],suf:'% GDP',prev:D.Y.bal_gdp[D.Y.bal_gdp.length-3],spark:D.Y.bal_gdp,goodUp:true,per:'2025p',color:'--gold',nav:['fiscal','fx_fisgdp']},
+    (function(){const B=D.mefDebt; if(!B) return {l:'Public Debt',cmp:'Y-o-Y',v:D.debt.total2025,suf:' Billion USD',prev:D.debt.total2025/(1+D.debt.growth/100),spark:null,goodUp:false,per:'2025',color:'--navy2',nav:['fiscal','f_debt_kpis']};
+      const n=B.periods.length-1, tot=k=>(B.stock.total_external[k]+B.domestic.stock[k])/1000;
+      return {l:'Public Debt',v:tot(n),suf:' Billion USD',prev:tot(0),spark:null,goodUp:false,
+        per:B.periods[n],color:'--navy2',note:'MEF bulletin',cmp:'Y-o-Y',nav:['fiscal','f_debt_kpis']};})(),
+    {l:'Credit Growth',cmp:'M-o-M',v:lastVal(M.psc_g),suf:'%',prev:valAt(M.psc_g,lastIdx(M.psc_g)-1),spark:M.psc_g,goodUp:true,per:monLab(d[lastIdx(M.psc_g)]),color:'--royal',nav:['monetary','m_credit']},
+    {l:'Broad Money (M2)',cmp:'M-o-M',v:lastVal(M.m2_g),suf:'%',prev:valAt(M.m2_g,lastIdx(M.m2_g)-1),spark:M.m2_g,goodUp:true,per:monLab(d[lastIdx(M.m2_g)]),color:'--emerald',nav:['monetary','m_m2']},
+    {l:'Deposit Growth',cmp:'M-o-M',v:lastVal(M.dep_g),suf:'%',prev:valAt(M.dep_g,lastIdx(M.dep_g)-1),spark:M.dep_g,goodUp:true,per:monLab(d[lastIdx(M.dep_g)]),color:'--emerald',nav:['monetary','m_credit']},
+    {l:'NPL Ratio',cmp:fsiCmp('npl'),v:lastVal(FSIS().npl),suf:'%',prev:valAt(FSIS().npl,lastIdx(FSIS().npl)-1),spark:FSIS().npl,goodUp:false,per:fsiLab('npl'),color:'--red',nav:['banking','b_npl']},
+    {l:'Banking ROA',cmp:fsiCmp('roa'),v:lastVal(FSIS().roa),suf:'%',prev:valAt(FSIS().roa,lastIdx(FSIS().roa)-1),spark:FSIS().roa,goodUp:true,per:fsiLab('roa'),color:'--gold',note:'FSI Framework',nav:['banking','b_prof']},
+    {l:'Banking ROE',cmp:fsiCmp('roe'),v:lastVal(FSIS().roe),suf:'%',prev:valAt(FSIS().roe,lastIdx(FSIS().roe)-1),spark:FSIS().roe,goodUp:true,per:fsiLab('roe'),color:'--gold',note:'FSI Framework',nav:['banking','b_prof']},
+    {l:'FCD Share to Total Deposits',cmp:'M-o-M',v:lastVal(M.fcd),suf:'%',prev:valAt(M.fcd,lastIdx(M.fcd)-1),spark:M.fcd,goodUp:false,per:monLab(d[lastIdx(M.fcd)]),color:'--navy2',nav:['monetary','m_dollar']},
   ];
-  // where each KPI links to: [tab, chart id]
-  const NAV=[['real','r_gdpq'],['monetary','m_cpi'],['monetary','m_cpi'],['monetary','m_fx'],
-    ['external','e_res'],['external','e_bop'],['fiscal','fx_fisgdp'],['fiscal','f_debt_kpis'],
-    ['monetary','m_credit'],['monetary','m_m2'],['monetary','m_credit'],
-    ['real','r_pc'],['monetary','m_fx'],
-    ['banking','b_npl'],['banking','b_prof'],['banking','b_prof'],['monetary','m_dollar']];
   const wrap=document.getElementById('kpis'); wrap.innerHTML='';
   defs.forEach((k,ix)=>{
     const dec=k.d!=null?k.d:(Math.abs(k.v)>=100?0:1);
@@ -2007,8 +2006,8 @@ function kpiRow(){
     const arr=ch==null?'':(Math.abs(ch)<1e-9?'▬':(ch>0?'▲':'▼'));
     const cls=ch==null?'flat':(Math.abs(ch)<1e-9?'flat':(ch>0?'up':'down'));
     const div=document.createElement('div'); div.className='kpi'; div.style.setProperty('--kc',`var(${k.color})`);
-    if(NAV[ix]){div.style.cursor='pointer'; div.title='View details →'; div.onclick=()=>goTo(NAV[ix][0],NAV[ix][1]);}
-    div.innerHTML=`<div class="period">${k.per}</div><div class="lbl">${k.l}</div>
+    if(k.nav){div.style.cursor='pointer'; div.title='View details →'; div.onclick=()=>goTo(k.nav[0],k.nav[1]);}
+    div.innerHTML=`<div class="period">${qFmt(k.per)}</div><div class="lbl">${k.l}</div>
       <div class="val">${fmt(k.v,dec)}<small>${k.suf}</small></div>
       <div class="meta">${ch==null?'':`<span class="arrow ${cls}">${arr} ${fmt(Math.abs(ch),dec)}</span><span>${k.cmp||'vs prev.'}</span>`}${k.note?`<span>· ${k.note}</span>`:''}</div>
       <div class="spark"><canvas id="spk${ix}"></canvas></div>`;
