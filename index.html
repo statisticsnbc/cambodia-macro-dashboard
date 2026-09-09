@@ -1104,9 +1104,6 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="src" style="margin:-2px 0 12px;font-size:9.5px;color:var(--text2);opacity:.8">Source: National Institute of Statistics. Note: CLFS = Cambodia Labour Force Survey.</div>
   <div class="sec-sub" style="margin:2px 0 10px;font-weight:700;color:var(--text);font-size:17.5px;letter-spacing:.2px;border-left:4px solid var(--gold);padding-left:10px">Economic Snapshot</div>
   <div class="kpis" id="r_wb" style="grid-template-columns:repeat(6,1fr)"></div>
-  <div class="grid" style="margin:12px 0 0">
-    <div class="card c12"><h3>Real GDP Growth by Institution — 2025 and 2026</h3><div class="cs">Real GDP growth (%), constant prices: latest published estimate for 2025 and forecast for 2026, by institution</div><div class="ch"><canvas id="r_inst"></canvas></div><div class="src">Source: National Bank of Cambodia, IMF, World Bank, ADB.</div></div>
-  </div>
   <div class="ai" id="r_ai"></div>
   <div class="grid">
     <div class="sec-sub" style="grid-column:1/-1;font-weight:700;color:var(--text);margin-top:10px;font-size:17.5px;letter-spacing:.2px;border-left:4px solid var(--gold);padding-left:10px">GDP and Inflation — output, prices and economic structure</div>
@@ -2699,19 +2696,6 @@ function pageReal(){
     document.getElementById('r_wb').innerHTML=eco.map(([l,v,n,c,nav])=>{
       const a=nav?` class="kpi kpi-link" style="--kc:var(${c})" title="View chart →" onclick="goTo('${nav[0]}','${nav[1]}')"`:` class="kpi" style="--kc:var(${c})"`;
       return `<div${a}><div class="lbl">${l}</div><div class="val">${v}</div><div class="meta"><span>${n}</span></div></div>`;}).join('');}
-  // Real GDP growth by institution, 2025 and 2026 (replaces the per-institution KPI cards)
-  if(D.inst&&D.inst.gdp){
-    const IG2=D.inst.gdp, iy25=IG2.years.indexOf('2025e'), iy26=IG2.years.indexOf('2026f');
-    const insts=Object.keys(IG2).filter(k=>k!=='years');
-    const val=(k,ix)=>(ix>=0&&IG2[k]&&IG2[k][ix]!=null)?IG2[k][ix]:null;
-    mk('r_inst',{type:'bar',data:{labels:insts,datasets:[
-      {label:'2025',data:insts.map(k=>val(k,iy25)),backgroundColor:p.navy+'CC',borderRadius:4},
-      {label:'2026',data:insts.map(k=>val(k,iy26)),backgroundColor:p.gold+'CC',borderRadius:4}]},
-      options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:P().text2,boxWidth:11,usePointStyle:true,padding:8,font:{size:10}}},
-        tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw==null?'no published figure':fmt(c.raw)+'%')}}},
-      scales:{x:{grid:{display:false},ticks:{color:p.text2,font:{size:10.5}}},
-        y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});
-  }
   // Inflation — headline, core and food (grouped with the GDP charts)
   if(document.getElementById('r_infl')){
     const MM=D.M, ilab=(D.mdates||[]).map(monLab), icut=Math.max(0,ilab.length-72);
