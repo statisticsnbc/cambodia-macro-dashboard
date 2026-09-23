@@ -1342,7 +1342,34 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="sec-title serif"><span class="kico kico-kbach" aria-hidden="true"></span>Core Financial Soundness Indicators</div>
   <div class="sec-sub">Core Financial Soundness Indicators for Deposit Takers and the Real Estate Market (IMF FSI Framework). Frequency: quarterly through 2023, monthly from January 2024 onward. Note: from 2024, the data follow the Cambodian International Financial Reporting Standards (CIFRS).</div>
   <div class="kpis fsi-kpis" id="b_cards"></div>
+  <div class="sec-sub" style="margin:-6px 0 10px">Additional FSIs (IMF FSI Framework) — deposit takers, credit and loan distribution, OFCs, households and real estate markets.</div>
+  <div class="kpis fsi-kpis2" id="b_cards2"></div>
+  <div class="ai" id="b_ai"></div>
   <div style="height:10px"></div>
+  <div style="height:10px"></div>
+  <div style="height:26px"></div>
+  <div class="sec-title serif"><span class="kico kico-kbach" aria-hidden="true"></span>Financial Soundness Indicators (FSI)</div>
+  <div class="sec-sub">Trends in the core FSIs for deposit takers, grouped as in the IMF FSI Framework. Quarterly through 2023, monthly from January 2024 (CIFRS basis).</div>
+  <div class="grid">
+    <div class="card c6"><h3>Capital Adequacy</h3><div class="cs">Regulatory Capital, Tier 1 Capital and CET1 to RWA; Tier 1 Capital to Assets; NPLs Net of Provisions to Capital (%)</div><div class="ch"><canvas id="b_car"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Asset Quality</h3><div class="cs">Nonperforming Loans to Total Gross Loans and Provisions to NPLs (Left Axis, %); Loan Concentration by Economic Activity (Right Axis, %)</div><div class="ch"><canvas id="b_npl"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Earnings and Profitability</h3><div class="cs">Return on Assets (Left Axis) and Return on Equity (Right Axis), %</div><div class="ch"><canvas id="b_prof"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Efficiency</h3><div class="cs">Interest Margin and Noninterest Expenses to Gross Income (% of Gross Income)</div><div class="ch"><canvas id="b_eff"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Liquidity</h3><div class="cs">Liquid Assets to Total Assets and Short-Term Liabilities (Left Axis, %); Liquidity Coverage Ratio (Right Axis, %)</div><div class="ch"><canvas id="b_liq"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Net Open Position in Foreign Exchange</h3><div class="cs">Net Open Position in Foreign Exchange to Capital (%)</div><div class="ch"><canvas id="b_nop"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+  </div>
+  <div style="height:26px"></div>
+  <div class="sec-title serif"><span class="kico kico-kbach" aria-hidden="true"></span>Additional Financial Soundness Indicators</div>
+  <div class="sec-sub">Additional FSIs (IMF FSI Framework) for deposit takers, credit and loan distribution, other financial corporations (OFCs), households and real estate markets. Quarterly through 2023, monthly from January 2024 onward.</div>
+  <div class="grid">
+    <div class="card c6"><h3>Deposit Takers — Large Exposures</h3><div class="cs">Large Exposures to Capital (%)</div><div class="ch"><canvas id="b_le"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Credit and Loan Distribution — Funding</h3><div class="cs">Customer Deposits to Total Non-Interbank Loans (%)</div><div class="ch"><canvas id="b_cdl"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Credit and Loan Distribution — Credit to the Private Sector</h3><div class="cs">Credit to the Private Sector (Left Axis, Trillion KHR); Credit Growth to the Private Sector (Right Axis, % Y-o-Y)</div><div class="ch"><canvas id="b_cps"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Other Financial Corporations (OFCs)</h3><div class="cs">OFCs' Assets to GDP (%) — quarter-end observations (insurance corporations report quarterly)</div><div class="ch"><canvas id="b_ofc"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Households</h3><div class="cs">Household Debt to GDP (%)</div><div class="ch"><canvas id="b_hh"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+    <div class="card c6"><h3>Real Estate Markets</h3><div class="cs">Residential Real Estate Loans to Total Gross Loans (Left Axis, %); Commercial Real Estate Loans to Total Gross Loans (Right Axis, %)</div><div class="ch"><canvas id="b_re"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
+  </div>
+  <div style="height:26px"></div>
   <div class="sec-title serif"><span class="kico kico-bayon" aria-hidden="true"></span>Financial Institution Peer Comparison</div>
   <div class="grid">
     <div class="card c12"><h3>Institution Scorecard — Heatmap</h3><div class="cs">All Institutions Operating in 2025 — Commercial Banks, Specialized Banks, MDIs, MFIs and Financial Lease Institutions · Annual Data · Rows Ranked by 2025 Assets. Indicator:
@@ -1380,30 +1407,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
     <div class="card c6"><h3>Bank Risk–Return Matrix</h3><div class="cs">Each bubble is one institution — all 59 commercial banks + 4 deposit-taking MDIs · x: NPL ratio (credit risk) · y: return on assets · bubble size: total assets (2025) · labels shown for the 22 largest; hover for the rest</div><div class="ch"><canvas id="bc_prof"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
     <div class="card c6"><h3>Asset Quality — NPL Ratio</h3><div class="cs">Nonperforming Loans to Total Loans (%), 2024 vs 2025</div><div class="ch"><canvas id="bc_risk"></canvas></div><div class="src">Source: NBC Banking Supervision — Reports on Deposit-Taking Institutions</div></div>
   </div>
-  <div class="ai"><div id="bc_ai"></div><div id="b_ai" style="margin-top:16px;border-top:1px dashed var(--line);padding-top:14px"></div></div>
-  <div style="height:26px"></div>
-  <div class="sec-title serif"><span class="kico kico-kbach" aria-hidden="true"></span>Financial Soundness Indicators (FSI)</div>
-  <div class="sec-sub">Trends in the core FSIs for deposit takers, grouped as in the IMF FSI Framework. Quarterly through 2023, monthly from January 2024 (CIFRS basis).</div>
-  <div class="grid">
-    <div class="card c6"><h3>Capital Adequacy</h3><div class="cs">Regulatory Capital, Tier 1 Capital and CET1 to RWA; Tier 1 Capital to Assets; NPLs Net of Provisions to Capital (%)</div><div class="ch"><canvas id="b_car"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Asset Quality</h3><div class="cs">Nonperforming Loans to Total Gross Loans and Provisions to NPLs (Left Axis, %); Loan Concentration by Economic Activity (Right Axis, %)</div><div class="ch"><canvas id="b_npl"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Earnings and Profitability</h3><div class="cs">Return on Assets (Left Axis) and Return on Equity (Right Axis), %</div><div class="ch"><canvas id="b_prof"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Efficiency</h3><div class="cs">Interest Margin and Noninterest Expenses to Gross Income (% of Gross Income)</div><div class="ch"><canvas id="b_eff"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Liquidity</h3><div class="cs">Liquid Assets to Total Assets and Short-Term Liabilities (Left Axis, %); Liquidity Coverage Ratio (Right Axis, %)</div><div class="ch"><canvas id="b_liq"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Net Open Position in Foreign Exchange</h3><div class="cs">Net Open Position in Foreign Exchange to Capital (%)</div><div class="ch"><canvas id="b_nop"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-  </div>
-  <div style="height:26px"></div>
-  <div class="sec-title serif"><span class="kico kico-kbach" aria-hidden="true"></span>Additional Financial Soundness Indicators</div>
-  <div class="sec-sub">Additional FSIs (IMF FSI Framework) for deposit takers, credit and loan distribution, other financial corporations (OFCs), households and real estate markets. Quarterly through 2023, monthly from January 2024 onward.</div>
-  <div class="kpis fsi-kpis2" id="b_cards2"></div>
-  <div class="grid">
-    <div class="card c6"><h3>Deposit Takers — Large Exposures</h3><div class="cs">Large Exposures to Capital (%)</div><div class="ch"><canvas id="b_le"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Credit and Loan Distribution — Funding</h3><div class="cs">Customer Deposits to Total Non-Interbank Loans (%)</div><div class="ch"><canvas id="b_cdl"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Credit and Loan Distribution — Credit to the Private Sector</h3><div class="cs">Credit to the Private Sector (Left Axis, Trillion KHR); Credit Growth to the Private Sector (Right Axis, % Y-o-Y)</div><div class="ch"><canvas id="b_cps"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Other Financial Corporations (OFCs)</h3><div class="cs">OFCs' Assets to GDP (%) — quarter-end observations (insurance corporations report quarterly)</div><div class="ch"><canvas id="b_ofc"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Households</h3><div class="cs">Household Debt to GDP (%)</div><div class="ch"><canvas id="b_hh"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-    <div class="card c6"><h3>Real Estate Markets</h3><div class="cs">Residential Real Estate Loans to Total Gross Loans (Left Axis, %); Commercial Real Estate Loans to Total Gross Loans (Right Axis, %)</div><div class="ch"><canvas id="b_re"></canvas></div><div class="src">Source: National Bank of Cambodia</div></div>
-  </div>
+  <div class="ai" id="bc_ai"></div>
   </div></div>
 
 <!-- ================= RPPI ================= -->
