@@ -1053,6 +1053,9 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
     <div class="range" id="freq" title="Data frequency" style="display:none">
       <button data-f="M" class="on">Monthly</button><button data-f="Q">Quarterly</button><button data-f="Y">Yearly</button><button data-f="YTD">Year-to-Date</button>
     </div>
+    <div class="range" id="obs" title="Observation within each period" style="display:none">
+      <button data-o="end" class="on">End-Period</button><button data-o="avg">Average</button>
+    </div>
     <div class="range" id="range">
       <button data-r="24">2Y</button><button data-r="36">3Y</button><button data-r="60">5Y</button><button data-r="0" class="on">All</button>
     </div>
@@ -1879,7 +1882,11 @@ let CPIAGG = 'end';
    The selector can only coarsen a series - it never invents finer observations,
    so Real (quarterly national accounts) has no monthly option. */
 const FREQ_PAGES = {fiscal:['M','Q','Y'], cgo:['M','Q','Y'], monetary:['M','Q','Y'],
-                    payments:['M','Q','Y'], external:['M','Q','Y']};
+                    payments:['M','Q','Y'], external:['M','Q','Y'], rppi:['M','Q','Y']};
+/* Pages that also choose HOW a quarter or a year is observed: its closing month
+   (End-Period) or the mean of its months (Average). Monthly ignores it. */
+const OBS_PAGES = {rppi:1};
+let OBSMODE = 'end';
 const PPY = ()=> (FREQ==='M'?12:(FREQ==='Q'?4:1));   // periods per year
 /* Year-to-date view: every year is cut at the same month as the latest, partial
    year, so 2026 (Jan-Jul, say) is compared with Jan-Jul of each earlier year
@@ -6648,10 +6655,25 @@ function pageRPPI(){
      <p><span class="hl">Prices.</span> Residential property prices are <span class="hl">${dir(ov)} year on year</span> as of ${mth} (m/m: ${mm==null?'—':(mm>=0?'+':'')+fmt(mm,2)}%). Phnom Penh is ${dir(pp)} while other provinces are ${dir(pr)}, so the correction remains <span class="hl">concentrated in the capital</span>. ${weak?`Within Phnom Penh, the weakest area is <span class="hl">${weak[0]}</span> (${fmt(weak[1])}% Y-o-Y).`:''}</p>
      <p><span class="hl">Activity.</span> Transactions are running at about ${tx==null?'—':fmt0(tx)} per month (3-month average${txg==null?'':', '+(txg>=0?'+':'')+fmt(txg)+'% Y-o-Y'})${ppShare==null?'':', with roughly '+fmt0(ppShare)+'% of them in Phnom Penh'}. Because the RPPI is built from bank-collateral valuations, sustained price declines feed directly into collateral values and real-estate-linked credit risk.</p>${_relP}`;
    }}
-  // property market (monthly), RPPI from Jan 2021, transactions from Jan 2020
-  // the global 2Y/3Y/5Y/All toolbar filter (RANGE) applies on top of the data start
-  const rng=a=>RANGE===0?a:a.slice(-RANGE);
-  const rp0=D.mdates.indexOf('2021-01'), rps=a=>rng(rp0>=0?a.slice(rp0):a), rpLab=rps(D.mdates).map(monLab);
+  /* Property market: the RPPI runs from Jan 2021, transactions from Jan 2020.
+     The source is monthly, so the Monthly view is the published data untouched.
+     Quarterly and Yearly reduce each period to one observation - its closing
+     month (End-Period) or the mean of its months (Average) - and every series on
+     the page is reduced the same way, so the panels stay comparable with one
+     another and with the transaction shares built from them. The 2Y/3Y/5Y/All
+     filter then applies on top, counted in the frequency on show. */
+  const _rAgg=(FREQ==='Q'||FREQ==='Y');
+  const _rRed=(dates,a)=>_rAgg?((OBSMODE==='avg')?aggMean(dates,a||[],FREQ):aggLast(dates,a||[],FREQ))
+                             :(a||[]).slice();
+  const _rPer=_rAgg?(FREQ==='Y'?12:3):1;
+  const _rSpan=Math.max(2,Math.ceil(RANGE/_rPer));
+  const _rCut=a=>(RANGE===0)?a.slice():(a.length<=_rSpan?a.slice():a.slice(-_rSpan));
+  const _mkSl=function(start){
+    const i0=(start>=0)?start:0, dts=D.mdates.slice(i0);
+    return {lab:_rCut(_rAgg?aggDates(dts,FREQ).labels:dts.map(monLab)),
+            ser:function(a){ return _rCut(_rRed(dts,(a||[]).slice(i0))); }};
+  };
+  const _RP=_mkSl(D.mdates.indexOf('2021-01')), rps=_RP.ser, rpLab=_RP.lab;
   mk('r_rppi',{type:'line',data:{labels:rpLab,datasets:[
     {label:'Overall RPPI',data:rps(D.M.rppi_yoy),borderColor:p.navy,borderWidth:2.4,pointRadius:0,tension:.35},
     {label:'Phnom Penh RPPI',data:rps(D.M.rppi_pp_yoy),borderColor:p.red,borderWidth:2,pointRadius:0,tension:.35},
@@ -6676,7 +6698,7 @@ function pageRPPI(){
     {label:'Outer Suburb',data:rps(D.M.rppi_os_mom||[]),borderColor:p.emerald,borderWidth:2,pointRadius:0,tension:.35}]},
     options:Object.assign(baseOpts(),{plugins:{legend:{labels:{color:p.text2,boxWidth:12,usePointStyle:true,pointStyle:'rectRounded',padding:14,font:{size:10.5}}}},
       scales:{x:{grid:{display:false},ticks:{color:p.text2,maxTicksLimit:12}},y:{grid:{color:p.line},border:{display:false},ticks:{color:p.text2,callback:v=>v+'%'}}}})});
-  const tx0=D.mdates.indexOf('2020-01'), txs=a=>rng(tx0>=0?a.slice(tx0):a), txLab=txs(D.mdates).map(monLab);
+  const _TX=_mkSl(D.mdates.indexOf('2020-01')), txs=_TX.ser, txLab=_TX.lab;
   mk('r_rpptx',{type:'line',data:{labels:txLab,datasets:[
     {label:'Total',data:txs(D.M.rppi_tx),borderColor:p.gold,backgroundColor:grad('r_rpptx',p.gold,.18),fill:true,borderWidth:2.4,pointRadius:0,tension:.3},
     {label:'Phnom Penh',data:txs(D.M.rppi_tx_pp||[]),borderColor:p.red,borderWidth:2,pointRadius:0,tension:.3},
@@ -8613,6 +8635,7 @@ document.getElementById('freq').addEventListener('click',e=>{
   FREQ=b.dataset.f;
   Object.keys(rendered).forEach(k=>delete rendered[k]);
   const active=document.querySelector('.tab.active').dataset.p;
+  _syncObsUI(active);
   PAGES[active](); rendered[active]=true; mountAskBoxes(active);
 });
 /* End-period / Average, beside the Consumer Price Inflation chart. It only shows
@@ -8624,6 +8647,23 @@ document.getElementById('freq').addEventListener('click',e=>{
     delete rendered['monetary'];
     PAGES.monetary(); rendered['monetary']=true; mountAskBoxes('monetary');
   }); })();
+/* End-Period / Average, beside the frequency buttons. It is offered only on a
+   page that declares it and only once a quarter or a year is being shown, since
+   at the source frequency there is nothing to reduce. */
+function _syncObsUI(pid){
+  const el=document.getElementById('obs'); if(!el) return;
+  const on=!!OBS_PAGES[pid]&&(FREQ==='Q'||FREQ==='Y');
+  el.style.display = on ? '' : 'none';
+  el.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.o===OBSMODE));
+}
+(function(){ const g=document.getElementById('obs'); if(!g) return;
+  g.addEventListener('click',function(e){ const b=e.target.closest('button'); if(!b) return;
+    OBSMODE=b.dataset.o;
+    g.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on',x===b); });
+    Object.keys(rendered).forEach(function(k){ delete rendered[k]; });
+    const a=document.querySelector('.tab.active').dataset.p;
+    PAGES[a](); rendered[a]=true; mountAskBoxes(a);
+  }); })();
 function _syncFreqUI(pid){
   const el=document.getElementById('freq'); if(!el) return;
   const allow=FREQ_PAGES[pid];
@@ -8634,6 +8674,7 @@ function _syncFreqUI(pid){
   });
   if(allow.indexOf(FREQ)<0) FREQ=allow[0];      // clamp to something this page has
   el.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===FREQ));
+  _syncObsUI(pid);
 }
 /* The 2Y / 3Y / 5Y / All period buttons are not offered on the Overview tab;
    Overview charts always render over their full history (see PAGES.overview). */
