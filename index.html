@@ -1568,7 +1568,7 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
      <div class="card c6" id="card_debt_cred"><h3>Public External Debt by Creditor</h3><div class="cs" id="cs_debt_cred">Outstanding stock (Million USD)</div><div class="ch"><canvas id="f_debt_cred"></canvas></div><div class="src" id="f_debt_cred_src">Source: Ministry of Economy and Finance</div></div>
      <div class="card c6" id="card_debt_ccy"><h3>Public External Debt by Currency</h3><div class="cs" id="cs_debt_ccy">Currency composition of the outstanding stock</div><div class="ch"><canvas id="f_debt_ccy"></canvas></div><div class="src" id="f_debt_ccy_src">Source: Ministry of Economy and Finance</div></div>
      <div class="card c6" id="card_debt_svc"><h3>Debt Service Payment</h3><div class="cs" id="cs_debt_svc">Principal and interest, external and domestic (Million USD)</div><div class="ch"><canvas id="f_debt_svc"></canvas></div><div class="src" id="f_debt_svc_src">Source: Ministry of Economy and Finance</div></div>
-     <div class="card c6" id="card_debt_gdp"><h3>Public External Debt and Debt Service Payment to GDP</h3><div class="cs" id="cs_debt_gdp">Quarter-end public external debt stock (bars, left axis) and debt service paid over the four quarters to that date (line, right axis), each against nominal GDP for the same twelve months</div><div class="ch"><canvas id="f_debt_gdp"></canvas></div><div class="src" id="f_debt_gdp_src">Source: Ministry of Economy and Finance (debt); National Institute of Statistics, interpolated nominal GDP (denominator)</div></div>
+     <div class="card c6" id="card_debt_gdp"><h3>Public External Debt and Debt Service Payment to GDP</h3><div class="cs" id="cs_debt_gdp">Public external debt stock (bars, left axis) and debt service paid (line, right axis), each against nominal GDP</div><div class="ch"><canvas id="f_debt_gdp"></canvas></div><div class="src" id="f_debt_gdp_src">Source: MEF, NIS, and NBC</div></div>
   </div>
 </div></div>
 
@@ -5148,12 +5148,10 @@ function debtInit(){
              title:{display:true,text:'Debt service (% of GDP)',color:p.red,font:{size:10,weight:'700'}},
              ticks:{color:p.text2,callback:function(v){return fmt(v,1)+'%';}}}}})});
     const cs=document.getElementById('cs_debt_gdp');
-    if(cs)cs.textContent='Quarter-end public external debt stock (bars, left axis) and debt service '
-      +'paid over the four quarters to that date (line, right axis), each against nominal GDP '
-      +'for the same twelve months';
+    if(cs)cs.textContent='Public external debt stock (bars, left axis) and debt service paid '
+      +'(line, right axis), each against nominal GDP';
     const sr=document.getElementById('f_debt_gdp_src');
-    if(sr)sr.textContent='Source: Ministry of Economy and Finance (debt); '
-      +'National Institute of Statistics, interpolated nominal GDP (denominator)';
+    if(sr)sr.textContent='Source: MEF, NIS, and NBC';
     }
   }
 }
@@ -6915,12 +6913,46 @@ function eerXDraw(){
     return {nm:B.names[c]||c, c:c,
       ix:win.map(function(i){ return Q.vals[i]; }),
       d:win.map(function(i){ var v=Q.vals[i]; return (v==null)?null:(v-100); })}; });
+  /* Cambodia, from the National Bank of Cambodia's export-weighted NEER and REER
+     in the Selected Indicator table. That table publishes them only as an annual
+     percentage change, never as an index, so the series is chained onto this
+     panel's own 2020 = 100 base: each month of 2020 is set to 100, every later
+     month is carried forward from the same month a year earlier by its published
+     change, and the years before 2020 are recovered backwards the same way. Each
+     Cambodian cell is then the exact cumulative change since the same month of
+     2020, on the same quarterly average and in the same units as every other row;
+     the only thing set aside is how the twelve months of 2020 differed. */
+  var _khG=(tp==='R')?(D.M.reer_x||[]):(D.M.neer_x||[]), _khLast=null;
+  try{
+    var _md=D.mdates||[], _lv=_md.map(function(){ return null; }), _seed=0;
+    _md.forEach(function(d,i){ if(String(d).slice(0,4)==='2020'){ _lv[i]=100; _seed++; } });
+    if(_seed){
+      for(var _i=0;_i<_md.length;_i++){
+        if(String(_md[_i]).slice(0,4)<='2020') continue;
+        var _g=_khG[_i]; if(_g==null||_i<12||_lv[_i-12]==null) continue;
+        _lv[_i]=_lv[_i-12]*(1+_g/100);
+      }
+      for(var _j=_md.length-13;_j>=0;_j--){
+        if(String(_md[_j]).slice(0,4)>='2020') continue;
+        var _g2=_khG[_j+12]; if(_g2==null||_lv[_j+12]==null||(1+_g2/100)===0) continue;
+        _lv[_j]=_lv[_j+12]/(1+_g2/100);
+      }
+      for(var _k=_khG.length-1;_k>=0;_k--) if(_khG[_k]!=null){ _khLast={v:_khG[_k],m:_md[_k]}; break; }
+      var _KQ=bisToQ(_md,_lv), _kix={};
+      _KQ.keys.forEach(function(k,i){ _kix[k]=_KQ.vals[i]; });
+      if(qs.some(function(k){ return _kix[k]!=null; }))
+        rows.push({nm:'Cambodia', c:'KH', kh:true,
+          ix:qs.map(function(k){ return _kix[k]==null?null:+_kix[k].toFixed(1); }),
+          d:qs.map(function(k){ return _kix[k]==null?null:+(_kix[k]-100).toFixed(2); })});
+    }
+  }catch(e){}
   bisRows(el,cmpRank(rows),qs,20,1,bisSigned,function(r,v,k){
     var ix=r.ix[k];
     return r.nm+' — '+qFmt(qs[k])+': '+(v>=0?'+':'')+fmt(v,1)
       +'% against the 2020 average'+(ix!=null?(' · index '+fmt(ix,1)+' (2020 = 100)'):'')
-      +' · '+word+' broad effective exchange rate'
-      +(part[k]?' · quarter not yet complete':'');
+      +' · '+word+(r.kh?' export-weighted':' broad')+' effective exchange rate'
+      +(part[k]?' · quarter not yet complete':'')
+      +(r.kh?' · National Bank of Cambodia':' · BIS');
   },part);
   bisLeg('c_eer_leg',20,'%','Deviation from the 2020 average (%), '
     +(qs.length?(qFmt(qs[0])+' – '+qFmt(qs[qs.length-1])):'')
@@ -6928,8 +6960,9 @@ function eerXDraw(){
     +'competitiveness · shaded cells = no observation');
   var n=B.periods.length-1;
   var yoy=function(s){ var a=s[n], b=s[n-12]; return (a!=null&&b)?100*(a/b-1):null; };
-  var mv=cs.map(function(c){ return {nm:B.names[c]||c,g:yoy(B.series[tp+'|'+c])}; })
-           .filter(function(o){ return o.g!=null; }).sort(function(a,b){ return b.g-a.g; });
+  var mv=cs.map(function(c){ return {nm:B.names[c]||c,g:yoy(B.series[tp+'|'+c])}; });
+  if(_khLast) mv.push({nm:'Cambodia',g:_khLast.v,kh:true});
+  mv=mv.filter(function(o){ return o.g!=null; }).sort(function(a,b){ return b.g-a.g; });
   var txt='';
   if(mv.length>1) txt='Over the twelve months to '+monLab(B.periods[n])+', the '
     +(mv[0].g>=0?'largest appreciation':'smallest depreciation')+' among the economies shown was '
@@ -6937,13 +6970,14 @@ function eerXDraw(){
     +(mv[mv.length-1].g<0?'largest depreciation':'smallest appreciation')+' was '
     +cmpThe(mv[mv.length-1].nm)+' ('+(mv[mv.length-1].g>0?'+':'')+fmt(mv[mv.length-1].g,1)
     +'%), measured on the '+word+' effective rate.';
-  var us=yoy(B.series[tp+'|US']||[]);
-  if(us!=null) txt+=' The riel is held in a narrow band against the US dollar, so the US '
-    +word+' effective rate, '+(us>0?'up ':'down ')+fmt(Math.abs(us),1)
-    +'% over the same twelve months, is the closest published reference for the riel.';
+  if(_khLast) txt+=' Cambodia’s export-weighted '+word+' rate is '
+    +(_khLast.v>=0?'up ':'down ')+fmt(Math.abs(_khLast.v),1)+'% over the twelve months to '
+    +monLab(_khLast.m)+', '+((_khLast.v>=((mv[Math.floor(mv.length/2)]||{}).g||0))?'above':'below')
+    +' the median of the economies compared.';
   var nel=document.getElementById('c_eer_note'); if(nel) nel.innerHTML=txt;
   var s2=document.getElementById('c_eer_src');
-  if(s2) s2.innerHTML='Source: Bank for International Settlements.';
+  if(s2) s2.innerHTML='Source: Bank for International Settlements; '
+    +'Cambodia: National Bank of Cambodia.';
   bisBind2('c_eer_type',eerXDraw); bisBind2('c_eer_scope',eerXDraw);
 }
 function pageCompare(){
