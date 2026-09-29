@@ -1381,9 +1381,9 @@ footer{border-top:1px solid var(--line);padding:22px 0 34px;font-size:11px;color
   <div class="kpis" id="m_kpis" style="grid-template-columns:repeat(4,1fr)"></div>
   <div class="ai" id="m_ai"></div>
   <div class="grid">
-    <div class="card c6"><h3>Consumer Price Inflation</h3><div class="cs">Year-on-Year Inflation (%): Headline, Core, Food, and Oil-Related Inflation</div><div class="ch"><canvas id="m_cpi"></canvas></div><div class="src">Source: National Institute of Statistics.</div></div>
+    <div class="card c6"><h3>Consumer Price Inflation</h3><div class="cs">Year-on-Year Inflation (%): Headline, Core, Food, and Oil-Related Inflation<span id="cpi_meth"></span></div><div class="range" id="cpi_agg" title="How each quarter or year is calculated" style="margin:0 0 8px;display:none"><button data-a="end" class="on">End-period</button><button data-a="avg">Average</button></div><div class="ch"><canvas id="m_cpi"></canvas></div><div class="src">Source: National Institute of Statistics.</div></div>
     <div class="card c6"><h3>CPI Inflation Heatmap</h3><div class="cs">Year-on-Year Inflation (%)</div><div class="range" id="cpiheat_rng" style="margin:0 0 8px"><button data-r="12">1Y</button><button data-r="24" class="on">2Y</button><button data-r="36">3Y</button><button data-r="0">All</button></div><div style="overflow-x:auto"><table class="heat" id="m_cpiheat"></table></div><div class="src">Source: National Institute of Statistics.</div></div>
-    <div class="card c6"><h3>Credit-to-GDP</h3><div class="cs">Left axis: Credit-to-GDP ratio (%), one-sided HP trend (&#955; = 400,000) and &plusmn;1.5&times;RMS bands. Right axis: Credit-to-GDP gap (percentage points, bars)</div><div class="ch"><canvas id="m_cgg"></canvas></div><div class="src" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>Source: National Bank of Cambodia</span></div></div>
+    <div class="card c6"><h3>Credit-to-GDP</h3><div class="cs">Left axis: Credit-to-GDP ratio (%), one-sided HP trend (&#955; = 400,000) and &plusmn;1.5&times;RMS bands. Right axis: Credit-to-GDP gap (%, bars)</div><div class="ch"><canvas id="m_cgg"></canvas></div><div class="src" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>Source: National Bank of Cambodia</span></div></div>
     
     <div class="card c6"><h3>Mortgage Credit-to-GDP</h3><div class="cs">Mortgages (owner-occupied housing) credit / GDP (%), one-sided HP trend (&#955; = 400,000) and &plusmn;1.5&times;RMS bands</div><div class="ch"><canvas id="m_moew"></canvas></div><div class="src" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>Source: National Bank of Cambodia</span></div></div>
         <div class="card c6"><h3>Wholesale Trade Credit-to-GDP</h3><div class="cs">Wholesale trade credit / GDP (%), one-sided HP trend (&#955; = 400,000) and &plusmn;1.5&times;RMS bands</div><div class="ch"><canvas id="m_whgg"></canvas></div><div class="src" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>Source: National Bank of Cambodia</span></div></div>
@@ -1871,6 +1871,10 @@ function glassify(cfg){ try{
 ;(function(){try{var F=D.fiscalX,A=(D.v4&&D.v4.annGdpM);if(F&&A&&F.ngdp_usd_ann){F.ngdp_usd_ann=F.ngdp_usd_ann.map(function(v,i){return (v!=null)?v:((A[i]!=null)?A[i]:null);});}}catch(e){}})();
 let RANGE = 0; // months (default: All)
 let FREQ = 'M';   // data frequency for the Fiscal and CGO pages: M | Q | Y
+/* How the monthly inflation rates are reduced to one figure per quarter or year:
+   'end' = the period's closing month, 'avg' = the mean of its months. Monthly
+   frequency ignores it. */
+let CPIAGG = 'end';
 /* Which frequencies each page can honestly offer, given its source data.
    The selector can only coarsen a series - it never invents finer observations,
    so Real (quarterly national accounts) has no monthly option. */
@@ -1977,6 +1981,20 @@ function aggLast(mdates,arr,freq){
     if(!(k in last)){last[k]=null;order.push(k);}
     const v=(arr||[])[i]; if(v!=null&&!isNaN(v)) last[k]=v; });
   return order.map(k=>last[k]);
+}
+/* aggLast takes a period's closing observation; aggMean takes the mean of its
+   months. For a rate (inflation, a growth rate) these are the two honest ways to
+   read a quarter or a year, and they differ, so the chart names which one it uses. */
+function aggMean(mdates,arr,freq){
+  if(freq==='M') return (arr||[]).slice();
+  const cut=(freq==='YTD')?ytdCut(mdates):0;
+  const sum={},cnt={},order=[];
+  (mdates||[]).forEach(function(d,i){ const y=d.slice(0,4), m=+d.slice(5,7);
+    const k=(freq==='Q')?(y+'Q'+Math.ceil(m/3)):y;
+    if(!(k in sum)){ sum[k]=0; cnt[k]=0; order.push(k); }
+    if(freq==='YTD'&&m>cut) return;
+    const v=(arr||[])[i]; if(v!=null&&!isNaN(v)){ sum[k]+=v; cnt[k]++; } });
+  return order.map(function(k){ return cnt[k]?+(sum[k]/cnt[k]).toFixed(2):null; });
 }
 function freqWord(){ return FREQ==='M'?'month':(FREQ==='Q'?'quarter':'year'); }
 function freqAdj(){ return FREQ==='M'?'monthly':(FREQ==='Q'?'quarterly':(FREQ==='YTD'?'year-to-date':'annual')); }
@@ -4512,7 +4530,7 @@ function pageMonetary(){
         if(prev!=null&&(v<0)!==(prev<0)) _cgTurnQ=CQ[i];
         prev=v; } })();
     mk('m_cgg',{type:'line',data:{labels:CQ,datasets:[
-      {label:'Credit-to-GDP Gap (pp)',data:CG,type:'bar',yAxisID:'y2',
+      {label:'Credit-to-GDP Gap (%)',data:CG,type:'bar',yAxisID:'y2',
        backgroundColor:CG.map(_gapCol),borderWidth:0,order:6},
       {label:'Lower Band',data:CL,yAxisID:'y',borderColor:hexA(p.amber,.85),borderWidth:1.2,borderDash:[3,3],pointRadius:0,tension:.25,fill:false,order:5},
       {label:'Upper Band',data:CU,yAxisID:'y',borderColor:hexA(p.amber,.85),borderWidth:1.2,borderDash:[3,3],backgroundColor:hexA(p.amber,.13),pointRadius:0,tension:.25,fill:'-1',order:4},
@@ -4573,11 +4591,44 @@ function pageMonetary(){
      ];
      kel.innerHTML=defs.map(([l,v,d,u,c,ch])=>`<div class="kpi${ch?' kpi-link':''}" style="--kc:var(${c})"${ch?` title="View chart →" onclick="goTo('monetary','${ch}')"`:''}><div class="period">${d}</div><div class="lbl">${l}</div><div class="val">${v==null?'—':fmt(v,u===' riel'?0:1)}<small>${u}</small></div></div>`).join('');
    }}
-  mk('m_cpi',trimCfg({type:'line',data:{labels:_pinCFL(),datasets:[
-    {label:'Headline Inflation',data:_pinCF('infl'),borderColor:p.navy,borderWidth:2.6,pointRadius:0,tension:.35},
-    {label:'Core Inflation',data:_pinCF('core'),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
-    {label:'Food Inflation',data:_pinCF('food'),borderColor:p.emerald,borderWidth:1.6,pointRadius:0,tension:.35},
-    {label:'Oil-Related Inflation',data:_pinCF('oil'),borderColor:p.red,borderWidth:1.6,pointRadius:0,tension:.35}]},options:baseOpts()}));
+  /* Inflation is read monthly, so the monthly view is the one this chart has always
+     shown and is left untouched. At quarterly or yearly frequency the twelve-month
+     rates must be reduced to one figure per period, and the two conventions do not
+     agree: the period's closing month (end-period) or the mean of its months
+     (average). The reader picks, and the choice is named in the subtitle and in the
+     tooltip so an end-period figure is never read beside an average one. */
+  {const _cAgg=(FREQ==='Q'||FREQ==='Y');
+   const _cD=_CF?_CF.dates:_mdAll;
+   const _cRaw=k=>_CF?(_CF[k]||[]):((HM[k]||HM.dates.map(function(){return null;})).concat(M[k]||[]));
+   const _cPer=_cAgg?(FREQ==='Y'?12:3):1;
+   const _cSpan=Math.max(2,Math.ceil(RANGE/_cPer));
+   const _cCut=a=>(RANGE===0)?a.slice():(a.length<=_cSpan?a.slice():a.slice(-_cSpan));
+   const _cLabs=_cCut(_cAgg?aggDates(_cD,FREQ).labels:_cD.map(monLab));
+   const _cSer=k=>_cCut(_cAgg?((CPIAGG==='avg')?aggMean(_cD,_cRaw(k),FREQ)
+                                              :aggLast(_cD,_cRaw(k),FREQ))
+                             :_cRaw(k));
+   const _cPerN=(FREQ==='Y')?'year':'quarter';
+   const _cMeth=_cAgg?((FREQ==='Q'?'Quarterly':'Yearly')+', '
+                       +((CPIAGG==='avg')?'period average':'end-period')):'Monthly';
+   const _cFoot=_cAgg?(_cMeth+' \u00b7 '+((CPIAGG==='avg')
+                        ?('mean of the '+_cPerN+'\u2019s monthly rates')
+                        :('rate in the last month of the '+_cPerN)))
+                     :'Monthly observation';
+   const _cmEl=document.getElementById('cpi_meth');
+   if(_cmEl) _cmEl.textContent=' \u00b7 '+_cMeth;
+   const _cgEl=document.getElementById('cpi_agg');
+   if(_cgEl){ _cgEl.style.display=_cAgg?'':'none';
+     _cgEl.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on',b.dataset.a===CPIAGG); }); }
+   const _cOpt=baseOpts();
+   _cOpt.plugins=Object.assign({},_cOpt.plugins||{},{tooltip:{callbacks:{
+     label:function(c){ return c.dataset.label+': '+(c.raw==null?'\u2014':(fmt(c.raw,1)+'% Y-o-Y')); },
+     footer:function(){ return _cFoot; }}}});
+   mk('m_cpi',trimCfg({type:'line',data:{labels:_cLabs,datasets:[
+    {label:'Headline Inflation',data:_cSer('infl'),borderColor:p.navy,borderWidth:2.6,pointRadius:0,tension:.35},
+    {label:'Core Inflation',data:_cSer('core'),borderColor:p.royal,borderWidth:2,pointRadius:0,tension:.35,borderDash:[5,3]},
+    {label:'Food Inflation',data:_cSer('food'),borderColor:p.emerald,borderWidth:1.6,pointRadius:0,tension:.35},
+    {label:'Oil-Related Inflation',data:_cSer('oil'),borderColor:p.red,borderWidth:1.6,pointRadius:0,tension:.35}]},
+    options:_cOpt}));}
   { const C=D.cpi, HF=(D.v4&&D.v4.heatFull)||null, HX=(D.v3&&D.v3.cpiHeat)||{dates:[],series:{}};
     const hdates=HF?HF.dates:HX.dates.concat(C.dates);
     const hser={}; Object.keys(C.series).forEach(function(k){ hser[k]=HF?((HF.series&&HF.series[k])||[]):((HX.series&&HX.series[k])||HX.dates.map(function(){return null;})).concat(C.series[k]); });
@@ -4713,8 +4764,8 @@ function pageMonetary(){
      It is assembled from the plotted values, so it cannot drift from the chart. */
   const _cgTxt=(_cgNow==null)?'':(
     'The credit-to-GDP gap, the ratio\u2019s distance from its own trend, stands at '
-    +(_cgNow>0?'+':'\u2212')+fmt(Math.abs(_cgNow),1)+' percentage points in '+qFmt(_cgQ)
-    +(_cgPk!=null?(', against a peak of +'+fmt(_cgPk,1)+' points in '+qFmt(_cgPkQ)):'')
+    +(_cgNow>0?'+':'\u2212')+fmt(Math.abs(_cgNow),1)+'% in '+qFmt(_cgQ)
+    +(_cgPk!=null?(', against a peak of +'+fmt(_cgPk,1)+'% in '+qFmt(_cgPkQ)):'')
     +(_cgTurnQ?(', having crossed below zero in '+qFmt(_cgTurnQ)):'')
     +'. With credit growing more slowly than nominal output, the ratio now sits below the '
     +'trend the boom years established, which points to a credit cycle in retreat rather '
@@ -8492,6 +8543,15 @@ document.getElementById('freq').addEventListener('click',e=>{
   const active=document.querySelector('.tab.active').dataset.p;
   PAGES[active](); rendered[active]=true; mountAskBoxes(active);
 });
+/* End-period / Average, beside the Consumer Price Inflation chart. It only shows
+   at quarterly or yearly frequency; pageMonetary hides it again for Monthly. */
+(function(){ const g=document.getElementById('cpi_agg'); if(!g) return;
+  g.addEventListener('click',function(e){ const b=e.target.closest('button'); if(!b) return;
+    CPIAGG=b.dataset.a;
+    g.querySelectorAll('button').forEach(function(x){ x.classList.toggle('on',x===b); });
+    delete rendered['monetary'];
+    PAGES.monetary(); rendered['monetary']=true; mountAskBoxes('monetary');
+  }); })();
 function _syncFreqUI(pid){
   const el=document.getElementById('freq'); if(!el) return;
   const allow=FREQ_PAGES[pid];
